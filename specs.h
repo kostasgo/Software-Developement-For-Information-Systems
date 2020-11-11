@@ -12,9 +12,15 @@ typedef struct SpecsNodeType{
 } SpecsNode;
 
 typedef struct SpecsType{
-  struct SpecsNode* head;
+  SpecsNode* head;
   int size;
   char* id;
 } Specs;
+
+KV_Pair* createKV(char*, char*);
+void deleteKV(KV_Pair*);
+Specs* createSpecsList(char*);
+char* createSpecsID(char*, char*);
+void insertSpecs(Specs**, char*, char*);
 
 #endif
