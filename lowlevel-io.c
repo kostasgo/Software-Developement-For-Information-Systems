@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <unistd.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-//#include <errno.h>
+#include <sys/stat.h>
 #include <dirent.h>
 
-#define DIRSIZE 30
+
 
 int countDirectories(char* inputDir){
+  /*
+  Counts and returns the number of sub-directories inside
+  a directory. Can also count number of files inside a folder.
+  */
 
   DIR * dir;
   struct 	dirent* direntp;
@@ -35,17 +35,35 @@ int countDirectories(char* inputDir){
   return counter;
 }
 
-char* newPath(char* inputDir){
-  char* path;
-  bzero(path, 27 + strlen(inputDir));
-  memcpy(path, "Datasets/2013_camera_specs/", 27);
-  memcpy(path + 27, inputDir, strlen(inputDir));
+char* createPath(char* dir, char* subdir){
+  /*
+  Creates a path to the new subdir. This string should be
+  deleted by deletePath().
+  */
+
+  char* path = (char*) malloc(strlen(dir) + strlen(subdir) + 2);
+  bzero(path, strlen(dir) + strlen(subdir) + 2);
+  memcpy(path, dir, strlen(dir));
+  memcpy(path + strlen(dir), "/", 1);
+  memcpy(path + strlen(dir) + 1, subdir, strlen(subdir));
   return path;
 }
 
+void deletePath(char* path){
+  /*
+  Functions like this seem redundat, but it's to avoid
+  the use of free() inside random functions and the main program,
+  leading to a messier and more difficult to read code.
+  */
+  free(path);
+}
 
-char** getDirTable(int size, char* path){
 
+char** createDirTable(int size, char* path){
+  /*
+  Creates and returns a table of strings, that is a table of the names directories or files
+  found inside the given path.
+  */
   DIR * dir;
   char **files=NULL;
   files=(char**)malloc(size*sizeof(char*));
@@ -64,9 +82,9 @@ char** getDirTable(int size, char* path){
       j--;
       continue;
     }
-    files[j] = (char*)malloc(DIRSIZE+1);
-    //files[j]=strdup(direntp->d_name);
-    strcpy(files[j],direntp->d_name);
+    //files[j] = (char*)malloc(DIRSIZE+1);
+    files[j]=strdup(direntp->d_name);
+    //strcpy(files[j],direntp->d_name);
     //printf("%s %s\n",countries_table[i], files[j]);
   }
   closedir(dir);
@@ -74,23 +92,12 @@ char** getDirTable(int size, char* path){
   return files;
 }
 
-void destroyDirTable(char** table, int size){
-
-  for(int i=0;i<=size;i++){
+void deleteDirTable(char** table, int size){
+  /*
+  Deletes the table of strings, by doing the apropriate frees.
+  */
+  for(int i=0;i<size;i++){
     free(table[i]);
   }
   free(table);
-}
-
-int main(){
-  int a = countDirectories("Datasets/2013_camera_specs");
-  printf("%d\n",a);
-
-  char** directories= NULL;
-  directories = getDirTable(a, "Datasets/2013_camera_specs");
-  for(int i=0;i<=a;i++){
-    printf("%s\n",directories[i]);
-  }
-  destroyDirTable(directories, a);
-  return 0;
 }
