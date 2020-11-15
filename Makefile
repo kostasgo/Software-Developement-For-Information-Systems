@@ -1,10 +1,9 @@
 CC = gcc
 EXEC = disambugator
-SRCS = main.c specs.c lowlevel-io.c parser.c clique.c
-HDRS = specs.h lowlevel-io.h parser.h clique.h
-OBJS = main.o specs.o lowlevel-io.o parser.o clique.o
+SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c
+HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h
+OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o
 FLAGS = -g3 -c
-#ARGS =
 
 $(EXEC) : $(OBJS)
 	$(CC) -o $(EXEC) $(OBJS) -lm
@@ -14,6 +13,12 @@ main.o:
 
 specs.o:
 	$(CC) $(FLAGS) specs.c
+
+hashtable.o:
+	$(CC) $(FLAGS) hashtable.c
+
+keyvalue.o:
+	$(CC) $(FLAGS) keyvalue.c
 
 lowlevel-io.o:
 	$(CC) $(FLAGS) lowlevel-io.c
@@ -30,7 +35,7 @@ clean :
 	rm -f $(OBJS) $(EXEC)
 
 run: $(EXEC)
-	./$(EXEC) $(ARGS)
+	valgrind ./$(EXEC)
 
 count:
 	wc $(SRCS) $(HDRS)
