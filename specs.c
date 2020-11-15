@@ -3,8 +3,59 @@
 #include <string.h>
 #include <stdio.h>
 
+void insertValue(Value** value, char* str){
+  /*
+  inserts a new string to the value struct.
+  */
+  Value* node = (Value*)malloc(sizeof(Value));
+  node->next=NULL;
+  node->str=strdup(str);
 
-KV_Pair* createKV(char* key, char* value){
+  Value *temp;
+
+  //if the list is empty, place the node in list
+  if(*value==NULL) {
+    *value = node;
+    return;
+  }
+
+  //traverse the list for empty node
+
+	temp=(*value);
+	while(temp->next!= NULL){
+    temp=temp->next;
+	}
+	temp->next=node;
+}
+
+void deleteValue(Value* value){
+  /*
+  Deletes a value struct recursively.
+  */
+  Value *temp=value;
+  Value* next;
+
+  if (value==NULL)
+    return;
+  deleteValue(value->next);
+  free(value->str);
+  free(value);
+}
+
+void printValue(Value* value){
+  Value* temp=value;
+  if(temp==NULL){
+    return;
+  }
+  printf("[");
+  while(temp->next!=NULL){
+    printf("%s, ", temp->str);
+    temp=temp->next;
+  }
+  printf("%s]\n", temp->str);
+}
+
+KV_Pair* createKV(char* key, Value* value){
   /*
   Creates a KV_Pair struct and returns a pointer to it. Takes as input two strings,
   a key and a value. A KV_Pair struct that is created by this function should always be
@@ -13,7 +64,7 @@ KV_Pair* createKV(char* key, char* value){
 
   KV_Pair* data = (KV_Pair*) malloc(sizeof(KV_Pair));
   data->key=strdup(key);
-  data->value=strdup(value);
+  data->value=value;
   return data;
 }
 
@@ -22,7 +73,8 @@ void printKV(KV_Pair* pair){
   /*
   Takes as input a pointer to KV_Pair and prints its key and value.
   */
-  printf("Key: %s\nValue:%s\n\n", pair->key, pair->value);
+  printf("Key: %s Value: ", pair->key);\
+  printValue(pair->value);
 
 }
 
@@ -89,15 +141,12 @@ Specs* createSpecs(char* id){
 }
 
 
-void insertSpecs(Specs** specs, char* key, char* value){
+void insertSpecs(Specs** specs, KV_Pair* data){
   /*
-  Inserts a key-value, pair into the given Specs struct. The pair structure
-  is created inside the function, to limit the numer of functions that need
-  to be called by the main programm.
+  Inserts a key-value, pair into the given Specs struct.
   */
 
-  //create KV
-  KV_Pair* data=createKV(key, value);
+
   //create the node
   SpecsNode* node= (SpecsNode*)malloc(sizeof(SpecsNode));
 

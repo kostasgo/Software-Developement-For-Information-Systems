@@ -1,12 +1,21 @@
 #ifndef specs_h
 #define specs_h
 
+
+typedef struct ValueType{
+  /*
+  A struct to store a list of values
+  */
+  char* str;
+  struct ValueType* next;
+}Value;
+
 typedef struct KV_PairType {
   /*
   A structure to store a key-value pair.
   */
   char* key;
-  char* value;
+  Value* value;
 } KV_Pair;
 
 typedef struct SpecsNodeType{
@@ -30,13 +39,16 @@ typedef struct SpecsType{
   char* id;
 } Specs;
 
-KV_Pair* createKV(char*, char*);
+void insertValue(Value**, char*);
+void deleteValue(Value*);
+void printValue(Value*);
+KV_Pair* createKV(char*, Value*);
 void printKV(KV_Pair*);
 void deleteKV(KV_Pair*);
 char* createSpecsID(char*, char*);
 void deleteSpecsId(char*);
 Specs* createSpecs(char*);
-void insertSpecs(Specs**, char*, char*);
+void insertSpecs(Specs**, KV_Pair*);
 void printSpecs(Specs*);
 void deleteSpecsList(SpecsNode *);
 void deleteSpecs(Specs*);
