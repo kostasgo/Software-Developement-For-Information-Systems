@@ -90,18 +90,23 @@ void insertSpecs(Specs** specs, char* key, char* value){
 
   node->data=data;
   node->next=NULL;
+  SpecsNode *temp;
 
   //if the list is empty, place the node in list
   if((*specs)->list==NULL) {
     (*specs)->list = node;
   }
+  
   //traverse the list for empty node
-  SpecsNode *temp=(*specs)->list;
-  while(temp->next!= NULL){
-    temp=temp->next;
+  else{
+	  temp=(*specs)->list;
+	  while(temp->next!= NULL){
+		temp=temp->next;
+	}
+		temp->next=node;
   }
 
-  temp->next=node;
+  
   ((*specs)->size)++;
 }
 
