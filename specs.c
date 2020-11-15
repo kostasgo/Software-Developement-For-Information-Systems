@@ -118,8 +118,8 @@ void deleteSpecsList(SpecsNode *list){
   if (list==NULL)
     return;
   deleteSpecsList(list->next);
-  deleteKV(list->data);
-  free(list);
+  //deleteKV(list->data);
+  //free(list);
 
 
 }

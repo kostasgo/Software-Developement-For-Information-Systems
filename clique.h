@@ -31,7 +31,7 @@ void concatCliqueList(CliqueNode*, CliqueNode*);
 void mergeCliques(Clique*, Clique*);
 void deleteClique(Clique *);
 void printClique(Clique*);
-int isInClique(char, Clique*);
+int isInClique(char*, Clique*);
 
 
 #endif

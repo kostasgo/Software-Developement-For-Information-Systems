@@ -27,14 +27,15 @@ int main(int argc, char* argv[]){
 
   printf("NUM OF FILES: %d", numOfFiles);
 
-  Clique* cliques[numOfFiles];
-  for(int i=0; i<numOfFiles; i++){
+  Clique* cliques[13];
+  for(int i=0; i<13; i++){
     cliques[i]=createClique();
   }
 
   for(int i=0;i<13;i++){
-
+	printf("directory: %s/nfile name: %s\n", directories[0], files[i]);
     Specs* specs= parser(directories[0], files[i]);
+    
     insertClique(&(cliques[i]),specs);
 
 

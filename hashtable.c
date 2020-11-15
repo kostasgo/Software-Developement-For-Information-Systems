@@ -79,7 +79,7 @@ int searchHashtable(Hashtable* table, char* id){
     with the given key, and returns its position.
   */
   int counter =0;
-  int pos = compress(hash(specs->id),table->max); //the position where it should be
+  int pos = compress(hash(id),table->max); //the position where it should be
   Clique *cl= table->array[pos];//get its clique
   while(!isInClique(id, cl) && counter<table->max){
     pos++;  //go to next position

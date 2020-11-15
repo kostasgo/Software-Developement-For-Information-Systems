@@ -118,7 +118,7 @@ void printClique(Clique* clique){
 }
 
 int isInClique(char* id, Clique* clique){
-  Clique* temp = clique->list;
+  CliqueNode* temp = clique->list;
   while(temp!=NULL){
     if(!strcmp(temp->specs->id,id)){
       return 1;

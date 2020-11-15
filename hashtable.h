@@ -8,7 +8,7 @@ typedef struct HashtableType{
 }Hashtable;
 
 
-Hashtable* createHashtable(int, int);
+Hashtable* createHashtable(int);
 unsigned long hash(unsigned char *);
 int compress(unsigned long, int);
 void insertHashtable(Hashtable**, Specs*, char*);
