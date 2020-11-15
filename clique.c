@@ -1,4 +1,5 @@
-#include "Clique.h"
+#include "clique.h"
+#include "specs.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -32,10 +33,13 @@ void insertClique(Clique** clique, Specs* specs){
 
   node->specs=specs;
   node->next=NULL;
+  ((*clique)->size)++;
 
   //if the list is empty, place the node in list
   if((*clique)->list==NULL) {
     (*clique)->list = node;
+    printf("inserted!\n");
+    return;
   }
   //traverse the list for empty node
   CliqueNode *temp=(*clique)->list;
@@ -44,7 +48,8 @@ void insertClique(Clique** clique, Specs* specs){
   }
 
   temp->next=node;
-  ((*clique)->size)++;
+  printf("inserted!\n");
+
 }
 
 void deleteCliqueList(CliqueNode *list){
@@ -62,10 +67,52 @@ void deleteCliqueList(CliqueNode *list){
   free(list);
 }
 
+void concatCliqueList(CliqueNode* a, CliqueNode* b){
+  /*
+  Concatenates two Clique lists by attaching the second one
+  to the end of the first one.
+  */
+  if(a!=NULL && b!=NULL){
+    //if we found the end of a, attach b to it
+    if(a->next == NULL)
+      a->next =b;
+    else
+    //try for a->next
+      concatCliqueList(a->next,b);
+  }
+  else{
+    printf("One of the Cliques is empty\n");
+  }
+}
+
+void mergeCliques(Clique* a, Clique* b){
+  /*
+  Merges two Cliques into one. It concatenates their lists,
+  then adjusts the size. In the end it resets the second clique to
+  be empty.
+  */
+  Clique* temp =b;
+  concatCliqueList(a->list,temp->list);
+  a->size=temp->size + a->size;
+  b->size=0;
+  b->list=NULL;
+}
 /*
 Deletes a Clique struct, doing the apropriate frees.
 */
 void deleteClique(Clique* clique){
   deleteCliqueList(clique->list);
   free(clique);
+}
+
+void printClique(Clique* clique){
+  /*
+  Prints all the spec_ids inside the clique.
+  */
+  CliqueNode *temp = clique->list;
+  printf("Clique size= %d\n",clique->size);
+  for(int i=0; i<clique->size;i++){
+    printf("Spec %d: %s\n",i,temp->specs->id);
+    temp=temp->next;
+  }
 }

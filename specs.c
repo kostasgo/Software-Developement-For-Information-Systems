@@ -23,7 +23,7 @@ void printKV(KV_Pair* pair){
   Takes as input a pointer to KV_Pair and prints its key and value.
   */
   printf("Key: %s\nValue:%s\n\n", pair->key, pair->value);
-	
+
 }
 
 void deleteKV(KV_Pair* data){
@@ -101,6 +101,8 @@ void insertSpecs(Specs** specs, char* key, char* value){
   //create the node
   SpecsNode* node= (SpecsNode*)malloc(sizeof(SpecsNode));
 
+  ((*specs)->size)++;
+
   node->data=data;
   node->next=NULL;
   SpecsNode *temp;
@@ -109,7 +111,7 @@ void insertSpecs(Specs** specs, char* key, char* value){
   if((*specs)->list==NULL) {
     (*specs)->list = node;
   }
-  
+
   //traverse the list for empty node
   else{
 	  temp=(*specs)->list;
@@ -119,8 +121,6 @@ void insertSpecs(Specs** specs, char* key, char* value){
 		temp->next=node;
   }
 
-  
-  ((*specs)->size)++;
 }
 
 
@@ -129,16 +129,16 @@ void printSpecs(Specs* specs){
   Takes as input a pointer to Specs and prints its id
   and then all the pairs of keys and values it contains calling the printKV() function for each pair.
   */
-	
+
   SpecsNode *current_node = specs->list;
-	
+
   printf ("Spec ID: %s\n\nPairs of keys and values for this Spec ID\n", specs->id);
-	
+
   for(int i = 0; i < specs->size; i++){
-	printKV(current_node->data);
+	   printKV(current_node->data);
 	current_node = current_node->next;
   }
-	
+
 }
 
 
@@ -155,7 +155,7 @@ void deleteSpecsList(SpecsNode *list){
   deleteSpecsList(list->next);
   deleteKV(list->data);
   free(list);
-  //*L = NULL;
+
 
 }
 
@@ -165,6 +165,6 @@ Deletes a Specs struct, doing the apropriate frees.
 */
 void deleteSpecs(Specs* specs){
   deleteSpecsList(specs->list);
-  free(specs->id);
-  free(specs);
+  //free(specs->id);
+  //free(specs);
 }

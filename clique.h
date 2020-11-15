@@ -10,7 +10,7 @@ typedef struct CliqueNodeType{
   */
   Specs* specs;
   struct CliqueNodeType* next;
-}Clique;
+}CliqueNode;
 
 typedef struct CliqueType{
 
@@ -25,7 +25,12 @@ typedef struct CliqueType{
 
 Clique* createClique();
 void insertClique(Clique**, Specs*);
+
 void deleteCliqueList(CliqueNode *);
+void concatCliqueList(CliqueNode*, CliqueNode*);
+void mergeCliques(Clique*, Clique*);
+void deleteClique(Clique *);
+void printClique(Clique*);
 
 
 #endif
