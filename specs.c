@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 
+
 KV_Pair* createKV(char* key, char* value){
   /*
   Creates a KV_Pair struct and returns a pointer to it. Takes as input two strings,
@@ -16,6 +17,15 @@ KV_Pair* createKV(char* key, char* value){
   return data;
 }
 
+
+void printKV(KV_Pair* pair){
+  /*
+  Takes as input a pointer to KV_Pair and prints its key and value.
+  */
+  printf("Key: %s\nValue:%s\n\n", pair->key, pair->value);
+	
+}
+
 void deleteKV(KV_Pair* data){
   /*
   Deletes a KV_Pair struct, doing the apropriate frees.
@@ -24,6 +34,7 @@ void deleteKV(KV_Pair* data){
   free(data->value);
   free(data);
 }
+
 
 char* createSpecsID(char* directory, char* file){
   /*
@@ -50,6 +61,7 @@ char* createSpecsID(char* directory, char* file){
   return spec_id;
 }
 
+
 void deleteSpecsId(char* spec_id){
   /*
   Deletes a spec_id string by freeing it. This function may seem redundant,
@@ -59,6 +71,7 @@ void deleteSpecsId(char* spec_id){
 
   free(spec_id);
 }
+
 
 Specs* createSpecs(char* id){
   /*
@@ -110,6 +123,25 @@ void insertSpecs(Specs** specs, char* key, char* value){
   ((*specs)->size)++;
 }
 
+
+void printSpecs(Specs* specs){
+  /*
+  Takes as input a pointer to Specs and prints its id
+  and then all the pairs of keys and values it contains calling the printKV() function for each pair.
+  */
+	
+  SpecsNode *current_node = specs->list;
+	
+  printf ("Spec ID: %s\n\nPairs of keys and values for this Spec ID\n", specs->id);
+	
+  for(int i = 0; i < specs->size; i++){
+	printKV(current_node->data);
+	current_node = current_node->next;
+  }
+	
+}
+
+
 void deleteSpecsList(SpecsNode *list){
   /*
   A recursiv function to delete the list element of Specs. It frees
@@ -126,6 +158,8 @@ void deleteSpecsList(SpecsNode *list){
   //*L = NULL;
 
 }
+
+
 /*
 Deletes a Specs struct, doing the apropriate frees.
 */

@@ -31,11 +31,13 @@ typedef struct SpecsType{
 } Specs;
 
 KV_Pair* createKV(char*, char*);
+void printKV(KV_Pair*);
 void deleteKV(KV_Pair*);
 char* createSpecsID(char*, char*);
 void deleteSpecsId(char*);
 Specs* createSpecs(char*);
 void insertSpecs(Specs**, char*, char*);
+void printSpecs(Specs*);
 void deleteSpecsList(SpecsNode *);
 void deleteSpecs(Specs*);
 
