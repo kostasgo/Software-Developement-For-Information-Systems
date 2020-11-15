@@ -1,8 +1,8 @@
 CC = gcc
 EXEC = disambugator
-SRCS = main.c specs.c lowlevel-io.c
-HDRS = specs.h lowleve-io.h
-OBJS = main.o specs.o lowlevel-io.o
+SRCS = main.c specs.c lowlevel-io.c parser.c
+HDRS = specs.h lowleve-io.h parser.h
+OBJS = main.o specs.o lowlevel-io.o parcer.o
 FLAGS = -g3 -c
 #ARGS =
 
@@ -17,6 +17,9 @@ specs.o:
 
 lowlevel-io.o:
 	$(CC) $(FLAGS) lowlevel-io.c
+
+parser.o:
+	$(CC) $(FLAGS) parser.c
 
 .PHONY : clean info
 
