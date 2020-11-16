@@ -9,6 +9,7 @@ void insertValue(Value** value, char* str){
   */
   Value* node = (Value*)malloc(sizeof(Value));
   node->next=NULL;
+  //printf(str);
   node->str=strdup(str);
 
   Value *temp;
@@ -30,16 +31,19 @@ void insertValue(Value** value, char* str){
 
 void deleteValue(Value* value){
   /*
-  Deletes a value struct recursively.
+  Deletes a value struct.
   */
-  Value *temp=value;
-  Value* next;
 
-  if (value==NULL)
-    return;
-  deleteValue(value->next);
-  free(value->str);
-  free(value);
+  Value* next;
+  while(value != NULL){
+
+
+    next = value->next;
+    free(value->str);
+    free(value);
+    value=next;
+  }
+
 }
 
 void printValue(Value* value){
@@ -83,6 +87,6 @@ void deleteKV(KV_Pair* data){
   Deletes a KV_Pair struct, doing the apropriate frees.
   */
   free(data->key);
-  free(data->value);
+  deleteValue(data->value);
   free(data);
 }

@@ -38,7 +38,7 @@ void insertClique(Clique** clique, Specs* specs){
   //if the list is empty, place the node in list
   if((*clique)->list==NULL) {
     (*clique)->list = node;
-    printf("inserted!\n");
+    //printf("inserted!\n");
     return;
   }
   //traverse the list for empty node
@@ -48,7 +48,7 @@ void insertClique(Clique** clique, Specs* specs){
   }
 
   temp->next=node;
-  printf("inserted!\n");
+  //printf("inserted!\n");
 
 }
 
@@ -60,11 +60,13 @@ void deleteCliqueList(CliqueNode *list){
   CliqueNode *temp=list;
   CliqueNode* next;
 
-  if (list==NULL)
-    return;
-  deleteCliqueList(list->next);
-  deleteSpecs(list->specs);
-  free(list);
+  while(list != NULL){
+
+    deleteSpecs(list->specs);
+    next = list->next;
+    free(list);
+    list=next;
+  }
 }
 
 void concatCliqueList(CliqueNode* a, CliqueNode* b){

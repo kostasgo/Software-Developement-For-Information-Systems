@@ -11,8 +11,10 @@ typedef struct HashtableType{
 Hashtable* createHashtable(int);
 unsigned long hash(unsigned char *);
 int compress(unsigned long, int);
-void insertHashtable(Hashtable**, Specs*, char*);
+void insertHashtable(Hashtable**, Specs*);
 void deleteHashtable(Hashtable*);
+int searchHashtable(Hashtable*, char*);
+void printHashtable(Hashtable*);
 
 
 #endif

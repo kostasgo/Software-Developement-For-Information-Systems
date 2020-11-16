@@ -41,7 +41,7 @@ int compress(unsigned long key, int size){
   return key % size;
 }
 
-void insertHashtable(Hashtable **table, Specs *specs, char* str){
+void insertHashtable(Hashtable **table, Specs *specs){
   /*
   Inserts a Specs item into the hashtable. Finds the right position
   and then tries to put it in the first position that is empty.
@@ -73,7 +73,7 @@ void deleteHashtable(Hashtable* table){
   free(table);
   }
 
-int searchHashtable(Hashtable* table, char* id){
+{
   /*
     Searches inside the hashtable to find the spec
     with the given key, and returns its position.
@@ -93,4 +93,13 @@ int searchHashtable(Hashtable* table, char* id){
     return -1;
   }
 
+}
+
+void printHashtable(Hashtable* table){
+
+  for(int i=0;i<table->max;i++){
+    printf("Clique %d:\n",i);
+    printClique(table->array[i]);
+  }
+  printf("\n");
 }

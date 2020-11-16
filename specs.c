@@ -112,15 +112,14 @@ void deleteSpecsList(SpecsNode *list){
   A recursiv function to delete the list element of Specs. It frees
   the nodes and also deletes the key-value pairs inside them.
   */
-  SpecsNode *temp=list;
   SpecsNode* next;
+  while(list != NULL){
 
-  if (list==NULL)
-    return;
-  deleteSpecsList(list->next);
-  //deleteKV(list->data);
-  //free(list);
-
+    deleteKV(list->data);
+    next = list->next;
+    free(list);
+    list=next;
+  }
 
 }
 
@@ -130,6 +129,6 @@ Deletes a Specs struct, doing the apropriate frees.
 */
 void deleteSpecs(Specs* specs){
   deleteSpecsList(specs->list);
-  //free(specs->id);
-  //free(specs);
+  free(specs->id);
+  free(specs);
 }
