@@ -1,15 +1,22 @@
 CC = gcc
 EXEC = disambugator
-SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c
-HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h
+TEST = test
+SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c
+HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h
 OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o
+OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o
 FLAGS = -g3 -c
 
-$(EXEC) : $(OBJS)
+
+all : $(OBJS2) $(OBJS)
+	$(CC) -o $(TEST) $(OBJS2) -lm
 	$(CC) -o $(EXEC) $(OBJS) -lm
 
 main.o:
 	$(CC) $(FLAGS) main.c
+
+tests.o:
+	$(CC) $(FLAGS) tests.c
 
 specs.o:
 	$(CC) $(FLAGS) specs.c
@@ -35,7 +42,7 @@ parser.o:
 .PHONY : clean info
 
 clean :
-	rm -f $(OBJS) $(EXEC) output.csv
+	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) output.csv 
 
 run: $(EXEC)
 	valgrind ./$(EXEC)
