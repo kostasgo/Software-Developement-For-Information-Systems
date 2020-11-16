@@ -4,7 +4,7 @@
 #include "hashtable.h"
 
 void adjustCliques(char* line, Hashtable** table){
-	printf("%s\n",line);
+	//printf("%s\n",line);
 	char* spec_1, *spec_2, *temp;
 	int label, pos_1, pos_2;
 
@@ -27,7 +27,7 @@ void adjustCliques(char* line, Hashtable** table){
 	pos_2=searchHashtable(*table, spec_2);
 
 
-	printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
+	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
 
 	if(pos_1<pos_2){
 		mergeCliques((*table)->array[pos_1], (*table)->array[pos_2]);
@@ -51,17 +51,22 @@ void outputToFile(Hashtable* table){
   fprintf(fp,"left_spec_id, right_spec_id\n");
 	for(int i=0; i<table->max;i++){
 		if(table->array[i]->size>1){
-			printf("in!\n");
+
 			CliqueNode* head = table->array[i]->list;
 			CliqueNode* temp1 = head;
-			CliqueNode* temp2 = head;
-			for(int j=0; j<table->array[i]->size;j++){
-				for(int k=j; k<table->array[i]->size;k++){
+			CliqueNode* temp2 = temp1;
+			//printf("%d\n", table->array[i]->size);
+			printClique(table->array[i]);
+			while(temp1!=NULL){
+				temp2=temp2->next;
+				while(temp2!=NULL){
+					printf("%s, %s\n",temp1->specs->id, temp2->specs->id);
 					fprintf(fp,"%s, %s\n",temp1->specs->id, temp2->specs->id);
 					temp2=temp2->next;
 				}
-				temp2=head;
+
 				temp1=temp1->next;
+				temp2=temp1;
 			}
 		}
 	}

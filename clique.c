@@ -74,7 +74,7 @@ void concatCliqueList(CliqueNode* a, CliqueNode* b){
   Concatenates two Clique lists by attaching the second one
   to the end of the first one.
   */
-  printf("recursion!\n");
+  //printf("recursion!\n");
   if(a!=NULL && b!=NULL){
     //if we found the end of a, attach b to it
     if(a->next == NULL)

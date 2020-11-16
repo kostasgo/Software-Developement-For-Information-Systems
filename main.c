@@ -158,7 +158,7 @@ int main(int argc, char* argv[]){
   int c=0;
   while(getline(&line, &len, fp) != -1){
     //printf("%s\n",line);
-    //adjustCliques(line, &cliques);
+    adjustCliques(line, &cliques);
     c++;
   }
   printf("Num of lines: %d\n",c);
