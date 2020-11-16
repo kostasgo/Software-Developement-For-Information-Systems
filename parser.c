@@ -11,7 +11,7 @@
 Specs* parser(char* directory, char* file){
 
 	FILE *fp;
-	char *key, *temp_value, *value;
+	char *key, *temp_value, *value, *value2;
 
 	char* dirpath = createPath(DATAPATH, directory);
 	char* filepath = createPath(dirpath, file);
@@ -55,6 +55,13 @@ Specs* parser(char* directory, char* file){
 		   the loop keeps running as long as quotation_mark equals 2
 		   which means until we find another quotation mark
 		*/
+		
+		if (quotation_mark == 2 && (char)current_character=='"'){
+			
+			strcpy(key, "");
+			quotation_mark++;
+			
+		}
 
 		while (quotation_mark == 2){
 
@@ -82,7 +89,10 @@ Specs* parser(char* directory, char* file){
 					exit(EXIT_FAILURE);
 				}
 				key[key_size - 1] = '\0';
-
+				
+				value2 = strdup(key);
+				//printf("value2 = %s\n", value2);
+				
 				quotation_mark++;
 
 			}
@@ -166,6 +176,7 @@ Specs* parser(char* directory, char* file){
 				memcpy(value, temp_value, value_size);
 
 				value[value_size] = '\0';
+				printf("key: %s\nvalue: %s\n\n", key, value);
 
 				//insert
 				insertValue(&val, value);
@@ -241,7 +252,7 @@ Specs* parser(char* directory, char* file){
 
 		//	printf("value size :%d\n", value_size);
 
-			if ((value = malloc((value_size + 1) * sizeof(char))) == NULL){
+			if ((value = malloc((value_size + 2) * sizeof(char))) == NULL){
 				perror("malloc failed");
 				exit(EXIT_FAILURE);
 			}
