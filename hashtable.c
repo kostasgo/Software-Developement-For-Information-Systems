@@ -73,7 +73,7 @@ void deleteHashtable(Hashtable* table){
   free(table);
   }
 
-{
+int searchHashtable(Hashtable* table, char* id){
   /*
     Searches inside the hashtable to find the spec
     with the given key, and returns its position.
