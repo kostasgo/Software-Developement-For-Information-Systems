@@ -1,8 +1,8 @@
 CC = gcc
 EXEC = disambugator
-SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c
-HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h
-OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o
+SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c
+HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h
+OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o
 FLAGS = -g3 -c
 
 $(EXEC) : $(OBJS)
@@ -16,6 +16,9 @@ specs.o:
 
 hashtable.o:
 	$(CC) $(FLAGS) hashtable.c
+
+create-output.o:
+	$(CC) $(FLAGS) create-output.c
 
 keyvalue.o:
 	$(CC) $(FLAGS) keyvalue.c
