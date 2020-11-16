@@ -10,6 +10,11 @@
 
 Specs* parser(char* directory, char* file){
 
+	/*
+	This function looks at given .json file in given directory and parses
+	its data into a Specs struct. Then returns a pointer to the Struct.
+	*/
+
 	FILE *fp;
 	char *key, *temp_value, *value, *value2;
 

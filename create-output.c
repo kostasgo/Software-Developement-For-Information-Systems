@@ -4,6 +4,10 @@
 #include "hashtable.h"
 
 void adjustCliques(char* line, Hashtable** table){
+	/*
+	This function reads a .csv line, finds the two keys in the hashtable,
+	and merges their cliques if they are in different cliques.
+	*/
 	//printf("%s\n",line);
 	char* spec_1, *spec_2, *temp;
 	int label, pos_1, pos_2;
@@ -41,6 +45,11 @@ void adjustCliques(char* line, Hashtable** table){
 }
 
 void outputToFile(Hashtable* table){
+	/*
+	Does the final output. Runs through the whole hashtable and
+	for for each clique that has at least two members, it prints every two
+	of its members in the accepted .csv format
+	*/
 	FILE *fp;
   fp= fopen("output.csv", "w");
   if(fp == NULL){
@@ -56,11 +65,11 @@ void outputToFile(Hashtable* table){
 			CliqueNode* temp1 = head;
 			CliqueNode* temp2 = temp1;
 			//printf("%d\n", table->array[i]->size);
-			printClique(table->array[i]);
+			//printClique(table->array[i]);
 			while(temp1!=NULL){
 				temp2=temp2->next;
 				while(temp2!=NULL){
-					printf("%s, %s\n",temp1->specs->id, temp2->specs->id);
+					//printf("%s, %s\n",temp1->specs->id, temp2->specs->id);
 					fprintf(fp,"%s, %s\n",temp1->specs->id, temp2->specs->id);
 					temp2=temp2->next;
 				}
