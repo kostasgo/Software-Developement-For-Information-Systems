@@ -65,7 +65,7 @@ KV_Pair* createKV(char* key, Value* value){
   a key and a value. A KV_Pair struct that is created by this function should always be
   destroyed by deleteKV().
   */
-
+  //printf("%s\n",key);
   KV_Pair* data = (KV_Pair*) malloc(sizeof(KV_Pair));
   data->key=strdup(key);
   data->value=value;

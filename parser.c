@@ -47,20 +47,30 @@ Specs* parser(char* directory, char* file){
 
 		// when the current charachter is a quotation mark, the corresponding variable is incremented by 1
 
-		if ((char)current_character == '"')
+		if ((char)current_character == '"'){
 			quotation_mark++;
+			//printf("build key!]\n");
+		}
+
 
 
 		/* when the variable quotation_mark equals 2, we start "building" the key string
 		   the loop keeps running as long as quotation_mark equals 2
 		   which means until we find another quotation mark
 		*/
-		
+		printf("QM: %d, CC: %c\n", quotation_mark, (char)current_character);
+
 		if (quotation_mark == 2 && (char)current_character=='"'){
-			
-			strcpy(key, "");
+			printf("in!\n");
+			key_size++;
+			if ((key = realloc(key, key_size * sizeof(char))) == NULL){
+				perror("realloc failed");
+				exit(EXIT_FAILURE);
+			}
+			key[key_size - 1] = '\0';
+
 			quotation_mark++;
-			
+
 		}
 
 		while (quotation_mark == 2){
@@ -89,10 +99,10 @@ Specs* parser(char* directory, char* file){
 					exit(EXIT_FAILURE);
 				}
 				key[key_size - 1] = '\0';
-				
+
 				value2 = strdup(key);
 				//printf("value2 = %s\n", value2);
-				
+
 				quotation_mark++;
 
 			}
@@ -176,7 +186,7 @@ Specs* parser(char* directory, char* file){
 				memcpy(value, temp_value, value_size);
 
 				value[value_size] = '\0';
-				printf("key: %s\nvalue: %s\n\n", key, value);
+				//printf("key: %s\nvalue: %s\n\n", key, value);
 
 				//insert
 				insertValue(&val, value);

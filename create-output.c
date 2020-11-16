@@ -25,6 +25,9 @@ void adjustCliques(char* line, Hashtable** table){
 	pos_1=searchHashtable(*table, spec_1);
 	pos_2=searchHashtable(*table, spec_2);
 
+	printf("%s\n",line);
+	printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
+
 	if(pos_1<pos_2){
 		mergeCliques((*table)->array[pos_1], (*table)->array[pos_2]);
 	}

@@ -89,9 +89,7 @@ int main(int argc, char* argv[]){
   */
 
   char* inputFile;
-  for (int i=0;i<argc; i++){
-    printf("%d: %s\n",i, argv[i]);
-  }
+
 
   if(argc!=2 && argc!=1){
     printf("Usage: ./disambugator (-l)\n");
@@ -100,11 +98,13 @@ int main(int argc, char* argv[]){
   if(argc == 1){
 
     inputFile=strdup(MEDIUM);
+    printf("Running with medium file! (Default)\n");
   }
   if(argc == 2){
     if(!strcmp(argv[1],"-l")){
 
       inputFile=strdup(LARGE);
+      printf("Running with large file!\n");
     }
     else{
       printf("Usage: ./disambugator (-l)\n");
@@ -114,20 +114,25 @@ int main(int argc, char* argv[]){
   }
 
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE);
-
+/*
   //Access Files
   int numOfFiles, numOfDirectories;
   //Create Directories table
+
   numOfDirectories=countDirectories(DATAPATH);
   char** directories = createDirTable(numOfDirectories, DATAPATH);
+  printf("processing directories...\n\n");
 
   for(int i=0; i<numOfDirectories; i++){
     //For each directory create files table
+
+    printf("%s\n",directories[i]);
     char* path= createPath(DATAPATH, directories[i]);
     int numOfFiles=countDirectories(path);
     char ** files=createDirTable(numOfFiles, path);
     Specs* specs=NULL;
     for(int j=0;j<numOfFiles;j++){
+      //printf("%s\n\n",files[j]);
       //Parse each .json file and insert it into the hashtable
       specs= parser(directories[i],files[j]);
       insertHashtable(&cliques,specs);
@@ -138,8 +143,10 @@ int main(int argc, char* argv[]){
   }
 
   deleteDirTable(directories,numOfDirectories);
-  deleteHashtable(cliques);
+*/
 
+  Specs* specs=parser("www.alibaba.com","34956.json");
+  printSpecs(specs);
   FILE *fp;
   fp = fopen(inputFile, "r");
   if(fp == NULL){
@@ -148,13 +155,15 @@ int main(int argc, char* argv[]){
   }
   char *line = NULL;
   size_t len=0;
-
+  int c=0;
   while(getline(&line, &len, fp) != -1){
-      adjustCliques(line, &cliques);
-
+    //printf("%s\n",line);
+    //adjustCliques(line, &cliques);
+    c++;
   }
+  printf("Num of lines: %d\n",c);
   free(line);
-
+  deleteHashtable(cliques);
 
   return 0;
 
