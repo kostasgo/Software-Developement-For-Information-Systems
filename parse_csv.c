@@ -1,27 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "parser.h"
-#include "specs.h"
-#include "lowlevel-io.h"
-#include "keyvalue.h"
 
-#define DATAPATH "Datasets/2013_camera_specs"
-
-Specs* parser(char* directory, char* file){
+int main(){
 
 	FILE *fp;
 	char *key, *temp_value, *value;
 
-	char* dirpath = createPath(DATAPATH, directory);
-	char* filepath = createPath(dirpath, file);
-	deletePath(dirpath);
-
-	if ((fp = fopen(filepath,"r")) == NULL){
+	if ((fp = fopen("4233.json","r")) == NULL){
 		perror("Open of file failed");
 		exit(EXIT_FAILURE);
 	}
-	deletePath(filepath);
 
 	int quotation_mark = 0, key_size = 0, value_size = 0, current_character, bracket = 0;
 //	char former_character;
@@ -36,14 +25,67 @@ Specs* parser(char* directory, char* file){
 		exit(EXIT_FAILURE);
 	}
 
-	char* id = createSpecsID(directory, file);
-	Specs* spec = createSpecs(id);
-	
-	Value *val = NULL;
-	KV_Pair *pair;
-	
+	while ((current_character = fgetc(fp)) != EOF){
 
-	while ((current_character = fgetc(fp)) != EOF){		
+	/*	// when we change line if there was a quotation mark in the previous line, then that line contains a spec key and a corresponding value
+		// if there was no quotation mark in the previous line, that line must be ignored, because it doesn't contain useful information
+
+		if ((char)current_character == '\n' && bracket == 0){
+
+			if (quotation_mark > 0){
+
+				quotation_mark = 0;
+
+				key_size++;
+				if ((key = realloc(key, key_size * sizeof(char))) == NULL){
+					perror("realloc failed");
+					exit(EXIT_FAILURE);
+				}
+				key[key_size - 1] = '\0';
+
+				value_size++;
+				if ((temp_value = realloc(temp_value, value_size * sizeof(char))) == NULL){
+					perror("realloc failed");
+					exit(EXIT_FAILURE);
+				}
+				temp_value[value_size - 1] = '\0';
+				value_size--;
+				
+				while (temp_value[value_size] != '"')
+					value_size--;
+					
+				printf("value size :%d\n", value_size);
+
+				if ((value = malloc((value_size + 1) * sizeof(char))) == NULL){
+					perror("malloc failed");
+					exit(EXIT_FAILURE);
+				}
+
+				memcpy(value, temp_value, value_size);
+
+				value[value_size] = '\0';
+
+
+				//printf("key: %s\nvalue: %s\n\n", key, value_size, (int)strlen(value), temp_value, value);
+				insertSpecs(&spec, key, value);
+				free(key);
+				free(temp_value);
+				free(value);
+				key_size = 0;
+				value_size = 0;
+				if((key = malloc (sizeof(char))) == NULL){
+					perror("malloc failed");
+					exit(EXIT_FAILURE);
+				}
+
+				if((temp_value = malloc (sizeof(char))) == NULL){
+					perror("malloc failed");
+					exit(EXIT_FAILURE);
+				}
+			}
+		}*/
+		
+		
 
 		// when the current charachter is a quotation mark, the corresponding variable is incremented by 1
 
@@ -66,13 +108,12 @@ Specs* parser(char* directory, char* file){
 			}
 			key[key_size-1] = (char) current_character;
 			
+			current_character = fgetc(fp);
 			
 			/* when we find a quotation mark the key string must be finalised
 			   and value 3 must be assigned to the quotation_mark variable
 			   so that the loop ends and the rest function continues
 			 */
-			
-			current_character = fgetc(fp); 
 			 
 			if((char)current_character == '"'){
 				
@@ -111,7 +152,7 @@ Specs* parser(char* directory, char* file){
 			
 			do{
 				current_character = fgetc(fp);
-			}while ((char)current_character != '"' && (char)current_character != ']');
+			}while ((char)current_character != '"' && current_character != ']');
 			
 			
 			// if a quotation mark is found first then a value string must begin to be built
@@ -156,7 +197,7 @@ Specs* parser(char* directory, char* file){
 				while (temp_value[value_size] != '"')
 					value_size--;
 					
-			//	printf("value size :%d\n", value_size);
+		//		printf("value size :%d\n", value_size);
 
 				if ((value = malloc((value_size + 1) * sizeof(char))) == NULL){
 					perror("malloc failed");
@@ -167,8 +208,10 @@ Specs* parser(char* directory, char* file){
 
 				value[value_size] = '\0';
 				
+				
+				printf("key: %s\nvalue: %s\n\n", key, value);
 				//insert
-				insertValue(&val, value);
+				
 				
 				// prepare for the next value to be found
 				free(value);
@@ -189,9 +232,6 @@ Specs* parser(char* directory, char* file){
 			
 			if ((char)current_character == ']'){
 				
-				pair = createKV(key, val);
-				insertSpecs(&spec, pair);
-				//val = NULL;
 				free(key);
 				key_size = 0;
 				value_size = 0;
@@ -238,7 +278,7 @@ Specs* parser(char* directory, char* file){
 			while (temp_value[value_size] != '"')
 				value_size--;
 					
-		//	printf("value size :%d\n", value_size);
+	//		printf("value size :%d\n", value_size);
 
 			if ((value = malloc((value_size + 1) * sizeof(char))) == NULL){
 				perror("malloc failed");
@@ -249,12 +289,10 @@ Specs* parser(char* directory, char* file){
 
 			value[value_size] = '\0';
 			
-			//insert
-			insertValue(&val, value);
-			pair = createKV(key, val);
-			insertSpecs(&spec, pair);
+			printf("key: %s\nvalue: %s\n\n", key, value);
 			
-			//val = NULL;
+			//insert
+			
 			free(key);
 			free(temp_value);
 			free(value);
@@ -274,8 +312,24 @@ Specs* parser(char* directory, char* file){
 			
 		}
 		
+	/*	if (quotation_mark >= 5 && bracket == 0){
+			value_size++;
 
-		if (quotation_mark == 1 || quotation_mark == 4)
+			if ((temp_value = realloc(temp_value, value_size * sizeof(char))) == NULL){
+				perror("realloc failed");
+				exit(EXIT_FAILURE);
+			}
+
+			temp_value[value_size - 1] = (char) current_character;
+		}*/
+
+		/* when the quotation mark is found for the 1st time in the line, the variable quotation_mark equals 1
+		   when the quotation mark is found for the 3rd time in the line, the variable quotation_mark equals 4
+
+		   in both cases, we increment the variable quotation mark by one
+		   we do so, so that we bypass the quotation mark and start "building" our key or our value string accordingly from the next character */
+
+		if (quotation_mark == 1 || (quotation_mark == 4 && bracket == 0))
 			quotation_mark++;
 
 	//	former_character = (char) current_character;
@@ -287,8 +341,5 @@ Specs* parser(char* directory, char* file){
 		perror("Cannot close file");
 	}
 
-	deleteSpecsId(id);
-	
-	return spec;
 
 }
