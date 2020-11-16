@@ -114,7 +114,7 @@ int main(int argc, char* argv[]){
   }
 
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE);
-/*
+
   //Access Files
   int numOfFiles, numOfDirectories;
   //Create Directories table
@@ -142,11 +142,11 @@ int main(int argc, char* argv[]){
     deleteDirTable(files, numOfFiles);
   }
 
-  deleteDirTable(directories,numOfDirectories);
-*/
 
-  Specs* specs=parser("www.alibaba.com","34956.json");
-  printSpecs(specs);
+
+
+//  Specs* specs=parser("www.alibaba.com","34956.json");
+//  printSpecs(specs);
   FILE *fp;
   fp = fopen(inputFile, "r");
   if(fp == NULL){
@@ -163,7 +163,10 @@ int main(int argc, char* argv[]){
   }
   printf("Num of lines: %d\n",c);
   free(line);
+  outputToFile(cliques);
   deleteHashtable(cliques);
+
+  fclose(fp);
 
   return 0;
 

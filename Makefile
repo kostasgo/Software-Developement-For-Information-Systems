@@ -35,7 +35,7 @@ parser.o:
 .PHONY : clean info
 
 clean :
-	rm -f $(OBJS) $(EXEC)
+	rm -f $(OBJS) $(EXEC) output.csv
 
 run: $(EXEC)
 	valgrind ./$(EXEC)

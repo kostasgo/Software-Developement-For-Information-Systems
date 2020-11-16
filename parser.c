@@ -49,7 +49,7 @@ Specs* parser(char* directory, char* file){
 
 		if ((char)current_character == '"'){
 			quotation_mark++;
-			//printf("build key!]\n");
+			//printf("found qm!\n");
 		}
 
 
@@ -58,10 +58,10 @@ Specs* parser(char* directory, char* file){
 		   the loop keeps running as long as quotation_mark equals 2
 		   which means until we find another quotation mark
 		*/
-		printf("QM: %d, CC: %c\n", quotation_mark, (char)current_character);
+		//printf("QM: %d, CC: %c\n", quotation_mark, (char)current_character);
 
-		if (quotation_mark == 2 && (char)current_character=='"'){
-			printf("in!\n");
+		if (quotation_mark == 3 && (char)current_character=='"'){
+			//printf("in!\n");
 			key_size++;
 			if ((key = realloc(key, key_size * sizeof(char))) == NULL){
 				perror("realloc failed");
@@ -69,7 +69,7 @@ Specs* parser(char* directory, char* file){
 			}
 			key[key_size - 1] = '\0';
 
-			quotation_mark++;
+			//quotation_mark++;
 
 		}
 
@@ -298,8 +298,12 @@ Specs* parser(char* directory, char* file){
 		}
 
 
-		if (quotation_mark == 1 || quotation_mark == 4)
+		if (quotation_mark == 1 || quotation_mark == 4){
+		//	printf("Incrementing!\n");
 			quotation_mark++;
+		}
+
+
 
 	//	former_character = (char) current_character;
 
