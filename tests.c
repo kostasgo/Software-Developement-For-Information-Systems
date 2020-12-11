@@ -24,8 +24,7 @@ void test_KV(void) {
 	TEST_ASSERT(pair != NULL);
 
 	deleteKV(pair);
-  //TEST_ASSERT(pair==NULL); //eixa ayto edw
-  //TEST_ASSERT(value==NULL); //ki ayto
+
 
 
 
@@ -119,7 +118,6 @@ void test_Hashtable(void) {
 
   Specs* specs2 = createSpecs("id2");
   insertSpecs(&specs2, pair2);
-
 
   Hashtable* table =NULL;
   table = createHashtable(2);

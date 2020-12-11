@@ -24,11 +24,15 @@ void adjustCliques(char* line, Hashtable** table){
   label = strtol(token, &temp, 10);
 
 	if(label==0){
+		free(spec_1);
+		free(spec_2);
 		return;
 	}
 
 	pos_1=searchHashtable(*table, spec_1);
 	pos_2=searchHashtable(*table, spec_2);
+	free(spec_1);
+	free(spec_2);
 
 
 	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);

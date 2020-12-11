@@ -105,7 +105,7 @@ Specs* parser(char* directory, char* file){
 				}
 				key[key_size - 1] = '\0';
 
-				value2 = strdup(key);
+				//value2 = strdup(key);
 				//printf("value2 = %s\n", value2);
 
 				quotation_mark++;

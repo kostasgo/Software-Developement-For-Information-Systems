@@ -140,9 +140,10 @@ int main(int argc, char* argv[]){
     }
 
     deleteDirTable(files, numOfFiles);
+    deletePath(path);
   }
 
-
+  deleteDirTable(directories, numOfDirectories);
 
 
 //  Specs* specs=parser("www.alibaba.com","34956.json");
