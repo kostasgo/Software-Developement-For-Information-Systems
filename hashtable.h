@@ -1,19 +1,19 @@
 #ifndef hashtable_h
 #define hashtable_h
-#include "clique.h"
+#include "bucket.h"
 
 typedef struct HashtableType{
   int max;
-  Clique** array;
+  Bucket** array;
 }Hashtable;
 
 
-Hashtable* createHashtable(int);
+Hashtable* createHashtable(int, int);
 unsigned long hash(unsigned char *);
 int compress(unsigned long, int);
 void insertHashtable(Hashtable**, Specs*);
 void deleteHashtable(Hashtable*);
-int searchHashtable(Hashtable*, char*);
+Clique* searchHashtable(Hashtable*, char*);
 void printHashtable(Hashtable*);
 
 

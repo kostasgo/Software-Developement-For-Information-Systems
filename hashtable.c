@@ -4,18 +4,19 @@
 #include <string.h>
 #include "specs.h"
 
-Hashtable* createHashtable(int size){
+
+Hashtable* createHashtable(int size, int bucketSize){
   /*
   Creates and returns an empty hashtable of given size. A Hashtable
   created by this function should always be deleted by deleteHashtable().
   */
 
   Hashtable *table = (Hashtable*)malloc(sizeof(Hashtable));
-  table->array=(Clique **)malloc(sizeof(Clique*)*size);
+  table->array=(Bucket **)malloc(sizeof(Bucket*)*size);
   table->max=size;
 
   for(int i=0;i<size;i++){
-    table->array[i]=createClique();
+    table->array[i]=createBucket(bucketSize);
   }
   return table;
 }
@@ -44,21 +45,14 @@ int compress(unsigned long key, int size){
 void insertHashtable(Hashtable **table, Specs *specs){
   /*
   Inserts a Specs item into the hashtable. Finds the right position
-  and then tries to put it in the first position that is empty.
-  This way, each item is in clique alone.
+  and then tries to put it in the bucket.
   */
 
 
   int pos = compress(hash(specs->id),(*table)->max); //find the position to enter
-  Clique *cl= (*table)->array[pos];//get its clique
+  Bucket *b= (*table)->array[pos];//get its bucket
 
-  while(cl->size!=0){
-    pos++;  //go to next position
-    pos%=(*table)->max;  //wrap around table
-    cl= (*table)->array[pos];
-  }
-
-  insertClique(&cl, specs);
+  insertBucket(&b, specs); //put it in there
 
 }
 
@@ -67,39 +61,30 @@ void deleteHashtable(Hashtable* table){
     Deletes the given hashtable.
   */
   for(int i=0;i<table->max;i++){
-      deleteClique(table->array[i]);
+    deleteBucket(table->array[i]);
   }
   free(table->array);
   free(table);
   }
 
-int searchHashtable(Hashtable* table, char* id){
+Clique* searchHashtable(Hashtable* table, char* id){
   /*
     Searches inside the hashtable to find the spec
-    with the given key, and returns its position.
+    with the given key, and returns its Clique.
   */
-  int counter =0;
+
   int pos = compress(hash(id),table->max); //the position where it should be
-  Clique *cl= table->array[pos];//get its clique
-  while(!isInClique(id, cl) && counter<table->max){
-    pos++;  //go to next position
-    pos%=table->max;  //wrap around table
-    cl= table->array[pos];
-  }
-  if(counter!=table->max){
-    return pos;
-  }
-  else{
-    return -1;
-  }
+
+  Clique* cl= searchBucket(id, table->array[pos]);
+  return cl;
 
 }
 
 void printHashtable(Hashtable* table){
 
   for(int i=0;i<table->max;i++){
-    printf("Clique %d:\n",i);
-    printClique(table->array[i]);
+    printf("Bucket %d:\n",i);
+    printBucket(table->array[i]);
   }
   printf("\n");
 }

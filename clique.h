@@ -32,6 +32,7 @@ void mergeCliques(Clique*, Clique*);
 void deleteClique(Clique *);
 void printClique(Clique*);
 int isInClique(char*, Clique*);
+int compareCliques(Clique*, Clique*);
 
 
 #endif

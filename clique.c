@@ -112,6 +112,7 @@ void printClique(Clique* clique){
   /*
   Prints all the spec_ids inside the clique.
   */
+  
   CliqueNode *temp = clique->list;
   printf("Clique size= %d\n",clique->size);
   for(int i=0; i<clique->size;i++){
@@ -129,5 +130,15 @@ int isInClique(char* id, Clique* clique){
     temp=temp->next;
   }
 
+  return 0;
+}
+
+int compareCliques(Clique* cl1, Clique* cl2){
+  /*
+  Compares two cliques. Returns 1 if they are the same, 0 if not.
+  */
+  if(!strcmp(cl1->list->specs->id,cl2->list->specs->id)){// they re the same iff their first specs should have the same id
+    return 1;
+  }
   return 0;
 }

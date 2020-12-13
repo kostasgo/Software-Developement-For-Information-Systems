@@ -13,7 +13,8 @@
 
 #define DATAPATH "Datasets/2013_camera_specs"
 
-#define HASHTABLE_SIZE 32000
+#define HASHTABLE_SIZE 30000
+#define BUCKET_SIZE 4
 
 int main(int argc, char* argv[]){
 /*
@@ -113,7 +114,7 @@ int main(int argc, char* argv[]){
 
   }
 
-  Hashtable* cliques = createHashtable(HASHTABLE_SIZE);
+  Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
 
   //Access Files
   int numOfFiles, numOfDirectories;
@@ -148,6 +149,7 @@ int main(int argc, char* argv[]){
 
 //  Specs* specs=parser("www.alibaba.com","34956.json");
 //  printSpecs(specs);
+
   FILE *fp;
   fp = fopen(inputFile, "r");
   if(fp == NULL){
@@ -162,6 +164,8 @@ int main(int argc, char* argv[]){
     adjustCliques(line, &cliques);
     c++;
   }
+
+  //printHashtable(cliques);
   printf("Num of lines: %d\n",c);
   free(line);
   outputToFile(cliques);
