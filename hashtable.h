@@ -13,7 +13,8 @@ unsigned long hash(unsigned char *);
 int compress(unsigned long, int);
 void insertHashtable(Hashtable**, Specs*);
 void deleteHashtable(Hashtable*);
-Clique* searchHashtable(Hashtable*, char*);
+BucketData* searchHashtable(Hashtable*, char*);
+void mergeCliques(Hashtable*, char*, char*);
 void printHashtable(Hashtable*);
 
 

@@ -1,10 +1,10 @@
 CC = gcc
 EXEC = disambugator
 TEST = test
-SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c
-HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h
-OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o bucket.o
-OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o
+SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c
+HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h
+OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o bucket.o linkedlist.o
+OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o
 FLAGS = -g3 -c
 
 
@@ -20,6 +20,9 @@ tests.o:
 
 specs.o:
 	$(CC) $(FLAGS) specs.c
+
+linkedlist.o:
+	$(CC) $(FLAGS) linkedlist.c
 
 bucket.o:
 	$(CC) $(FLAGS) bucket.c

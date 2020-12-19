@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "hashtable.h"
+#include "clique.h"
 
-void adjustCliques(char* line, Hashtable** table){
+void adjustCliques(char* line, Hashtable* table){
 	/*
 	This function reads a .csv line, finds the two keys in the hashtable,
 	and merges their cliques if they are in different cliques.
@@ -29,26 +30,13 @@ void adjustCliques(char* line, Hashtable** table){
 		return;
 	}
 
-	Clique* clique1=searchHashtable(*table, spec_1);
-	Clique* clique2=searchHashtable(*table, spec_2);
-	if(clique1==NULL){
-		//printf("%s not in hashtable\n",spec_1);
-		return;
-	}
-	if(clique2==NULL){
-		//printf("%s not in hashtable\n",spec_2);
-		return;
-	}
+
+
+	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
+	mergeCliques(table, spec_1, spec_2);
 	free(spec_1);
 	free(spec_2);
 
-	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
-
-	if(compareCliques(clique1,clique2)){return;}
-
-	//printf("Merging\n");
-
-	mergeCliques(clique1, clique2);
 }
 
 void outputToFile(Hashtable* table){
@@ -69,9 +57,15 @@ void outputToFile(Hashtable* table){
 		Bucket* temp= table->array[i];
 		while(temp!=NULL){
 			for(int j=0; j<temp->max; j++){
-				if(temp->cliques[j]->size>1){
+				if(temp->data[j]->clique==NULL){
+					continue;
+				}
+				if(temp->data[j]->flag==1){
+					continue;
+				}
+				if(temp->data[j]->clique->size>1){
 
-					CliqueNode* head = temp->cliques[j]->list;
+					CliqueNode* head = temp->data[j]->clique->list;
 					CliqueNode* temp1 = head;
 					CliqueNode* temp2 = temp1;
 					//printf("%d\n", table->array[i]->size);

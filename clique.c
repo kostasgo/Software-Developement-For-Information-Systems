@@ -88,31 +88,35 @@ void concatCliqueList(CliqueNode* a, CliqueNode* b){
   }
 }
 
-void mergeCliques(Clique* a, Clique* b){
-  /*
+/*void mergeCliques(Clique* a, Clique* b){
+
   Merges two Cliques into one. It concatenates their lists,
   then adjusts the size. In the end it resets the second clique to
   be empty.
-  */
+
   Clique* temp =b;
   concatCliqueList(a->list,temp->list);
   a->size=temp->size + a->size;
   b->size=0;
   b->list=NULL;
-}
-/*
-Deletes a Clique struct, doing the apropriate frees.
-*/
+}*/
+
+
 void deleteClique(Clique* clique){
-  deleteCliqueList(clique->list);
+  /*
+  Deletes a Clique struct, doing the apropriate frees.
+  */
+
   free(clique);
+
+
 }
 
 void printClique(Clique* clique){
   /*
   Prints all the spec_ids inside the clique.
   */
-  
+
   CliqueNode *temp = clique->list;
   printf("Clique size= %d\n",clique->size);
   for(int i=0; i<clique->size;i++){

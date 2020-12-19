@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "hashtable.h"
 #include "create-output.h"
+#include "linkedlist.h"
 
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
@@ -17,77 +18,6 @@
 #define BUCKET_SIZE 4
 
 int main(int argc, char* argv[]){
-/*
-  //TESTING specs.c
-  char* dir= strdup("www.ebay.com");
-  char* f= strdup("32000.json");
-  char* spec;
-  spec=createSpecsID(dir,f);
-
-  printf("%s\n",spec);
-  free(spec);
-
-//TESTING lowlvel-io,c
-  int numOfDirectories=countDirectories(DATAPATH);
-  char ** directories=createDirTable(numOfDirectories, DATAPATH);
-  char* path= createPath(DATAPATH, directories[0]);
-  int numOfFiles=countDirectories(path);
-  char ** files=createDirTable(numOfFiles, path);
-
-  printf("NUM OF FILES: %d", numOfFiles);
-
-  Hashtable* cliques=createHashtable(13);
-
-
-  for(int i=0;i<cliques->max;i++){
-    Specs* specs= parser(directories[0],files[i]);
-    insertHashtable(&cliques,specs);
-  }
-
-  printHashtable(cliques);
-  printf("\n\n---------\n\n");
-
-  printf("Merging 0 and 5!\n\n");
-  mergeCliques(cliques->array[0],cliques->array[5]);
-  printHashtable(cliques);
-  printf("\n\n---------\n\n");
-
-  printf("Merging 7 and 3!\n\n");
-  mergeCliques(cliques->array[7],cliques->array[3]);
-
-  printHashtable(cliques);
-  printf("\n\n---------\n\n");
-
-  printf("Merging 10 and 7s!\n\n");
-  mergeCliques(cliques->array[10],cliques->array[7]);
-
-  printHashtable(cliques);
-  printf("\n\n---------\n\n");
-
-  printf("Merging 11 and 12!\n\n");
-  mergeCliques(cliques->array[11],cliques->array[12]);
-
-  printHashtable(cliques);
-  printf("\n\n---------\n\n");
-
-  printf("Merging 0 and 10!\n\n");
-  mergeCliques(cliques->array[0],cliques->array[10]);
-
-  printf("\n\n---------\n\n");
-
-  printHashtable(cliques);
-
-  printf("\n\n---------\n\n");
-
-  deletePath(path);
-  deleteDirTable(files, numOfFiles);
-  deleteDirTable(directories, numOfDirectories);
-
-  deleteHashtable(cliques);
-  free(dir);
-  free(f);
-
-  */
 
   char* inputFile;
 
@@ -113,7 +43,7 @@ int main(int argc, char* argv[]){
     }
 
   }
-
+  ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
 
   //Access Files
@@ -136,6 +66,7 @@ int main(int argc, char* argv[]){
       //printf("%s\n\n",files[j]);
       //Parse each .json file and insert it into the hashtable
       specs= parser(directories[i],files[j]);
+      insertList(&specsList, specs);
       insertHashtable(&cliques,specs);
       specs=NULL;
     }
@@ -161,15 +92,19 @@ int main(int argc, char* argv[]){
   int c=0;
   while(getline(&line, &len, fp) != -1){
     //printf("%s\n",line);
-    adjustCliques(line, &cliques);
+    adjustCliques(line, cliques);
     c++;
   }
 
   //printHashtable(cliques);
   printf("Num of lines: %d\n",c);
   free(line);
+
+  free(inputFile);
   outputToFile(cliques);
+  deleteList(specsList);
   deleteHashtable(cliques);
+
 
   fclose(fp);
 

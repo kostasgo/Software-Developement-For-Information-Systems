@@ -28,7 +28,7 @@ void insertClique(Clique**, Specs*);
 
 void deleteCliqueList(CliqueNode *);
 void concatCliqueList(CliqueNode*, CliqueNode*);
-void mergeCliques(Clique*, Clique*);
+//void mergeCliques(Clique*, Clique*);
 void deleteClique(Clique *);
 void printClique(Clique*);
 int isInClique(char*, Clique*);

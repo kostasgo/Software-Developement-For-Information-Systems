@@ -1,18 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "bucket.h"
 #include "clique.h"
+
+BucketData* createBucketData(char * str, Clique* clique){
+  BucketData *data= (BucketData*)malloc(sizeof(BucketData));
+  data->id = strdup(str);
+  data->clique = clique;
+  data->flag=0;
+
+  return data;
+}
+
+void deleteBucketData(BucketData* data){
+  if(data->flag!=1){
+    deleteClique(data->clique);
+
+  }
+  free(data->id);
+  free(data);
+}
 
 Bucket* createBucket(int size){
 
   Bucket* bucket= (Bucket*)malloc(sizeof(Bucket));
-  bucket->cliques =(Clique**)malloc(sizeof(Clique)*size);
+  bucket->data =(BucketData**)malloc(sizeof(BucketData)*size);
 
   for(int i=0;i<size;i++){
-    bucket->cliques[i] = createClique();
+
+    bucket->data[i] = createBucketData("-", NULL);
+
+
   }
 
+  //bzero(array, sizeof(BucketData)*size);
   bucket->max =size;
+
   bucket->next = NULL;
 
   return bucket;
@@ -21,66 +45,76 @@ Bucket* createBucket(int size){
 
 
 
-void insertBucket(Bucket **b, Specs* specs){
-  /*
-  Inserts a spec to a bucket. It traverses the bucket's array of cliques, until it finds a clique that is empty
-  Then it enters the spec there. Otherwise, it checks the next bucket. If all non-NULL buckets in the list have been
-  checked, it creates a new one and inserts the specs to the first clique.
-  */
-  Bucket *temp= *b;
+BucketData* searchBucket(Bucket *b, char* str){
+  for(int i=0;i<b->max;i++){
+    //if the string is found, return its data
+    if(!strcmp(b->data[i]->id,str)){
+      return b->data[i];
+    }
+    //if "-" is found (sign for empty BucketData) return this empty data
+    if(!strcmp(b->data[i]->id,"-")){
+      return b->data[i];
+    }
+  }
+  //if it reaches this point, then we must look in the next bucket
+  if(b->next!=NULL){
+    return searchBucket(b->next, str);
+  }
+  else{//create a new bucket and return its first element
+    b->next=createBucket(b->max);
+    return b->data[0];
+  }
+
+}
+
+/*
+void bucketInsert(Bucket **b, BucketData *input){
+  Bucket *temp = *b;
   while(temp!=NULL){
-    for(int i=0;i<temp->max;i++){//look inside the bucket
-      //printf("%d %d\n",i, temp->max);
-      if( temp->cliques[i]->size==0 ){//if we find an empty clique we insert the specs to it
-
-        insertClique(&(temp->cliques[i]),specs);
-
+    int i;
+    for(i=0;i< (temp->max);i++){//look inside the bucket
+    //printf("%d\n",i);
+      if( !strcmp((temp->data[i]->id),"-" ) ){//if we find space we place the data
+      //printf("Placing %s\n",input->name);
+        temp->data[i]=input;
         return;
       }
-
+      if( !strcmp((temp->data[i]->id),input->id ) ){
+        //printf("Placing %s\n",input->name);
+        temp->data[i]=input;
+        return;
+      }
     }
     temp=temp->next;
   }
   //at this point there is no space or next bucket so we need to make one
   temp= createBucket((*b)->max);
-  insertClique(&(temp->cliques[0]),specs);
+  temp->data[0] = input;
+}
+*/
+
+void printBucket(Bucket* bucket){
+  for(int i=0;i<bucket->max;i++){
+    if(!strcmp(bucket->data[i]->id,"-" )){
+      return;
+    }
+    printf("%s\n",bucket->data[i]->id);
+  }
+  if(bucket->next!=NULL){
+    printf("Printing next bucket!\n");
+    printBucket(bucket->next);
+  }
 }
 
 void deleteBucket(Bucket* b){
   Bucket* next;
   while(b != NULL){
     for(int i=0;i<b->max;i++){
-      deleteClique(b->cliques[i]);
+      deleteBucketData(b->data[i]);
     }
-    free(b->cliques);
+    free(b->data);
     next = b->next;
     free(b);
     b=next;
-  }
-}
-
-Clique* searchBucket(char* id, Bucket* b){
-  for(int i=0;i<b->max;i++){
-    //if the string is found, return its clique
-    if(isInClique(id, b->cliques[i])){
-      return b->cliques[i];
-    }
-  }
-  //if it reaches this point, then we must look in the next bucket
-  if(b->next!=NULL){
-    return searchBucket(id, b->next);
-  }
-  else{// or create a new bucket and return its first element
-    return NULL;
-  }
-}
-
-void printBucket(Bucket* bucket){
-  for(int i=0;i<bucket->max;i++){
-    printClique(bucket->cliques[i]);
-  }
-  if(bucket->next!=NULL){
-    printf("Next bucket!\n");
-    printBucket(bucket->next);
   }
 }
