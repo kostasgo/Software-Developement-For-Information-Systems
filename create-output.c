@@ -3,8 +3,73 @@
 #include <string.h>
 #include "hashtable.h"
 #include "clique.h"
+#include "negative-cliques.h"
 
-void adjustCliques(char* line, Hashtable* table){
+void mergeCliques(Hashtable* table, char* id1, char* id2){
+
+  BucketData* data1=searchHashtable(table, id1);
+	BucketData* data2=searchHashtable(table, id2);
+
+  if(compareCliques(data1->clique,data2->clique)){return;}
+
+  if(data1->clique==NULL){
+		printf("%s not in hashtable\n",id1);
+		return;
+	}
+	if(data2->clique==NULL){
+		printf("%s not in hashtable\n",id2);
+		return;
+	}
+  BucketData *new, *old;
+  if(data1->clique->size>=data2->clique->size){
+    new = data1;
+    old = data2;
+  }
+  else{
+    new = data2;
+    old = data1;
+  }
+
+  Clique * temp=old->clique;
+  concatCliqueList(new->clique->list,temp->list);
+  new->clique->size=temp->size + new->clique->size;
+
+
+
+  CliqueNode* node = old->clique->list;
+  //printClique(old->clique);
+  //printf("Size is: %d\n\n",old->clique->size);
+  int size = old->clique->size;
+  for(int i=0; i<size; i++){
+    //printf("%d\n",i);
+    int pos_temp=-1;
+    BucketData* temp_data = searchHashtable(table, node->specs->id);
+    //deleteClique(temp_data->clique);
+    temp_data->clique=new->clique;
+    temp_data->flag=1;
+    node=node->next;
+
+  }
+
+}
+
+void updateNegatives(Hashtable* table, char* id1, char* id2){
+  BucketData* data1=searchHashtable(table, id1);
+	BucketData* data2=searchHashtable(table, id2);
+
+  if(data1->clique==NULL){
+		printf("%s not in hashtable\n",id1);
+		return;
+	}
+	if(data2->clique==NULL){
+		printf("%s not in hashtable\n",id2);
+		return;
+	}
+  insertNegatives(&(data1->clique->negatives), data2->clique);
+  insertNegatives(&(data2->clique->negatives), data1->clique);
+}
+
+void parseCsv(char* line, Hashtable* table){
 	/*
 	This function reads a .csv line, finds the two keys in the hashtable,
 	and merges their cliques if they are in different cliques.
@@ -25,6 +90,7 @@ void adjustCliques(char* line, Hashtable* table){
   label = strtol(token, &temp, 10);
 
 	if(label==0){
+		(table, spec_1, spec_2);
 		free(spec_1);
 		free(spec_2);
 		return;

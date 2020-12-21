@@ -6,6 +6,8 @@
 #include "clique.h"
 #include "specs.h"
 #include "parser.h"
+#include "negative-cliques.h"
+#include "create-output.h"
 
 
 void test_KV(void) {

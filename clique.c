@@ -16,6 +16,7 @@ Clique* createClique(){
   Clique* clique =(Clique*)malloc(sizeof(Clique));
   clique->list=NULL;
   clique->size=0;
+  clique->negatives=NULL;
 
 
   return clique;

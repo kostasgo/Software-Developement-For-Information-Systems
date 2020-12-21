@@ -2,6 +2,7 @@
 #define clique_h
 
 #include "specs.h"
+#include "negative-cliques.h"
 
 typedef struct CliqueNodeType{
   /*
@@ -17,10 +18,12 @@ typedef struct CliqueType{
 /*
  This is the struct for the Clique. It consists
  of the list of specs and a size, which will be used
- in the hashtable insert and search functions
+ in the hashtable insert and search functions. Also has
+ a list of the cliques that are negative to it, according to the csv file.
 */
   int size;
   CliqueNode* list;
+  struct NegListNodeType* negatives;
 }Clique;
 
 Clique* createClique();

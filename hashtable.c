@@ -90,53 +90,7 @@ BucketData* searchHashtable(Hashtable* table, char* id){
 
 }
 
-void mergeCliques(Hashtable* table, char* id1, char* id2){
 
-  BucketData* data1=searchHashtable(table, id1);
-	BucketData* data2=searchHashtable(table, id2);
-
-  if(compareCliques(data1->clique,data2->clique)){return;}
-
-  if(data1->clique==NULL){
-		printf("%s not in hashtable\n",id1);
-		return;
-	}
-	if(data2->clique==NULL){
-		printf("%s not in hashtable\n",id2);
-		return;
-	}
-  BucketData *new, *old;
-  if(data1->clique->size>=data2->clique->size){
-    new = data1;
-    old = data2;
-  }
-  else{
-    new = data2;
-    old = data1;
-  }
-
-  Clique * temp=old->clique;
-  concatCliqueList(new->clique->list,temp->list);
-  new->clique->size=temp->size + new->clique->size;
-
-
-
-  CliqueNode* node = old->clique->list;
-  //printClique(old->clique);
-  //printf("Size is: %d\n\n",old->clique->size);
-  int size = old->clique->size;
-  for(int i=0; i<size; i++){
-    //printf("%d\n",i);
-    int pos_temp=-1;
-    BucketData* temp_data = searchHashtable(table, node->specs->id);
-    //deleteClique(temp_data->clique);
-    temp_data->clique=new->clique;
-    temp_data->flag=1;
-    node=node->next;
-
-  }
-
-}
 
 void printHashtable(Hashtable* table){
 
