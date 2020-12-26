@@ -1,19 +1,17 @@
 #ifndef word_h
 #define word_h
 
-typedef struct WordBucketDataType{
-  char* id;
-  Clique* clique;
-  int flag;
-}WordBucketData;
+typedef struct WordType{
+  char* str;
+  int counter;
+}Word;
 
-typedef struct WordBucketType{
-
+typedef struct VocBucketType{
   int max;
-  WordBucketData** data;
-  struct WordBucketType* next;
+  Word** words;
+  struct VocBucketType* next;
+}VocBucket;
 
-}WordBucket;
 
 WordBucketData* createWordBucketData(char *,Clique*);
 void deleteWordBucketData(WordBucketData*);

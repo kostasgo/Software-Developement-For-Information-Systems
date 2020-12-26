@@ -3,34 +3,28 @@
 #include <string.h>
 #include "word.h"
 
-WordBucketData* createBucketData(char * str, Clique* clique){
-  WordBucketData *data= (WordBucketData*)malloc(sizeof(WordBucketData));
-  data->id = strdup(str);
-  data->clique = clique;
-  data->flag=0;
+Word* createWord(char * str){
+  Word *word= (Word*)malloc(sizeof(Word));
+  word->str = strdup(str);
+  word->counter =0;
 
-  return data;
+  return word;
 }
 
-void deleteWordBucketData(WordBucketData* data){
-  if(data->flag!=1){
-    deleteClique(data->clique);
 
-  }
-  free(data->id);
-  free(data);
+void deleteWord(Word* word){
+  free(word->str);
+  free(word);
 }
 
-WordBucket* createWordBucket(int size){
+VocBucket* createVocBucket(int size){
 
-  WordBucket* bucket= (WordBucket*)malloc(sizeof(WordBucket));
-  bucket->data =(WordBucketData**)malloc(sizeof(WordBucketData)*size);
+  VocBucket* bucket= (VocBucket*)malloc(sizeof(VocBucket));
+  bucket->words =(Word**)malloc(sizeof(Word)*size);
 
   for(int i=0;i<size;i++){
 
-    bucket->data[i] = createWordBucketData("-", NULL);
-
-
+    bucket->words[i] = createWord("-");
   }
 
   bucket->max =size;
@@ -43,15 +37,15 @@ WordBucket* createWordBucket(int size){
 
 
 
-WordBucketData* searchWordBucket(WordBucket *b, char* str){
+Word* searchVocBucket(VocBucket *b, char* str){
   for(int i=0;i<b->max;i++){
-    //if the string is found, return its data
-    if(!strcmp(b->data[i]->id,str)){
-      return b->data[i];
+    //if the string is found, return its word
+    if(!strcmp(b->Word[i]->id,str)){
+      return b->Word[i];
     }
-    //if "-" is found (sign for empty BucketData) return this empty data
-    if(!strcmp(b->data[i]->id,"-")){
-      return b->data[i];
+    //if "-" is found (sign for empty Word) return this empty Word
+    if(!strcmp(b->Word[i]->id,"-")){
+      return b->Word[i];
     }
   }
   //if it reaches this point, then we must look in the next bucket
@@ -60,18 +54,18 @@ WordBucketData* searchWordBucket(WordBucket *b, char* str){
   }
   else{//create a new bucket and return its first element
     b->next=createBucket(b->max);
-    return b->data[0];
+    return b->Word[0];
   }
 
 }
 
 
-void printWordBucket(WordBucket* bucket){
+void printVocBucket(VocBucket* bucket){
   for(int i=0;i<bucket->max;i++){
-    if(!strcmp(bucket->data[i]->id,"-" )){
+    if(!strcmp(bucket->Word[i]->id,"-" )){
       return;
     }
-    printf("%s\n",bucket->data[i]->id);
+    printf("%s\n",bucket->Word[i]->id);
   }
   if(bucket->next!=NULL){
     printf("Printing next bucket!\n");
@@ -79,13 +73,13 @@ void printWordBucket(WordBucket* bucket){
   }
 }
 
-void deleteWordBucket(WordBucket* b){
-  WordBucket* next;
+void deleteVocBucket(VocBucket* b){
+  VocBucket* next;
   while(b != NULL){
     for(int i=0;i<b->max;i++){
-      deleteWordBucketData(b->data[i]);
+      deleteWord(b->Word[i]);
     }
-    free(b->data);
+    free(b->Word);
     next = b->next;
     free(b);
     b=next;
