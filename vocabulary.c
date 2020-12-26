@@ -82,6 +82,10 @@ void filterSpec(Specs* specs, char** stopwords){
         if (strlen(currentString) == 1){ continue; }
         if (isStopword(currentString, stopwords)){ continue; }
         toLower(currentString);
+        if(currentString[strlen(currentString)-1]==','||currentString[strlen(currentString)-1]=='.'||currentString[strlen(currentString)-1]==')'||currentString[strlen(currentString)-1]==':'){
+          //printf("spotted!\n");
+          currentString[strlen(currentString)-1]=='\0';
+        }
         insertCorrect(&specs, currentString);
       }
       tempVal = tempVal->next;
