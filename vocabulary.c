@@ -5,6 +5,9 @@
 #include "specs.h"
 
 void toLower(char* s){
+  /*
+  Converts a string to lowercase
+  */
   for(int i=0; s[i]; i++){
     s[i]=tolower(s[i]);
   }
@@ -12,7 +15,8 @@ void toLower(char* s){
 
 char** createStopWordsTable(){
   /*
-  Creates a table of all the stopwords in the stopwords.csv file
+  Creates a table of all the stopwords in the stopwords.csv. Table should be deleted with
+  deleteStopWordsTable().
   */
   char **stopwords=NULL;
   stopwords=(char**)malloc(119*sizeof(char*));
@@ -40,16 +44,24 @@ char** createStopWordsTable(){
 }
 
 void deleteStopWordsTable(char** stopwords){
+  /*
+  Deletes the table of stopwords
+  */
   for(int i=0;i<119;i++){
     free(stopwords[i]);
   }
   free(stopwords);
 }
 
-int isStopword(char* str, char* stopwords){
-  for(int i=0; i<119; i++){
-    if(!strcmp(str,stopwords[i])){
+int isStopword(char* str, char** stopwords){
+  /*
+  Examines if the given word is in the table of stopwords
+  */
 
+  for(int i=0; i<119; i++){
+
+    //printf("%d\n", strcmp(str,stopwords[i]));
+    if(!strcmp(str,stopwords[i])){
       return 1;
     }
   }
@@ -68,10 +80,16 @@ void filterSpec(Specs* specs, char** stopwords){
       char* currentString;
       while( (currentString = strsep(&(tempVal->str), " ")) != NULL){
         if (strlen(currentString) == 1){ continue; }
-
+        if (isStopword(currentString, stopwords)){ continue; }
+        toLower(currentString);
+        insertWord(&(specs->words), currentString);
       }
+      tempVal = tempVal->next;
     }
+    temp = temp->next;
+
   }
+  deleteSpecsList(specs->list);
 }
 
 int main(){
@@ -79,9 +97,10 @@ int main(){
   toLower(test);
   printf("%s",test);
   char** stopwords=createStopWordsTable();
-  for(int i=0; i<119; i++){
-    printf("%s\n", stopwords[i]);
-  }
+
+
+  printf("%d\n", isStopword(test, stopwords));
+  printf("%d\n", isStopword("your", stopwords));
   deleteStopWordsTable(stopwords);
   free(test);
 }

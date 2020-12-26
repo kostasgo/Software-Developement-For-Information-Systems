@@ -43,6 +43,9 @@ int main(int argc, char* argv[]){
     }
 
   }
+
+
+
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
 
@@ -66,6 +69,10 @@ int main(int argc, char* argv[]){
       //printf("%s\n\n",files[j]);
       //Parse each .json file and insert it into the hashtable
       specs= parser(directories[i],files[j]);
+
+
+
+
       insertList(&specsList, specs);
       insertHashtable(&cliques,specs);
       specs=NULL;
