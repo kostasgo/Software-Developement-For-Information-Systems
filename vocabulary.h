@@ -1,9 +1,12 @@
 #ifndef vocabulary_h
 #define vocabulary_h
 
-typedef struct VocTable{
-  
-}
+#include "words.h"
+
+typedef struct VocTableType{
+  int max;
+  VocBucket** array;
+}VocTable;
 
 void toLower(char*);
 char** createStopWordsTable();

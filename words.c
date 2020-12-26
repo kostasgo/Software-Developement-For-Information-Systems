@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "word.h"
+#include "words.h"
 
 Word* createWord(char * str){
   Word *word= (Word*)malloc(sizeof(Word));
@@ -40,20 +40,20 @@ VocBucket* createVocBucket(int size){
 Word* searchVocBucket(VocBucket *b, char* str){
   for(int i=0;i<b->max;i++){
     //if the string is found, return its word
-    if(!strcmp(b->words[i]->id,str)){
+    if(!strcmp(b->words[i]->str,str)){
       return b->words[i];
     }
     //if "-" is found (sign for empty Word) return this empty Word
-    if(!strcmp(b->words[i]->id,"-")){
+    if(!strcmp(b->words[i]->str,"-")){
       return b->words[i];
     }
   }
   //if it reaches this point, then we must look in the next bucket
   if(b->next!=NULL){
-    return searchBucket(b->next, str);
+    return searchVocBucket(b->next, str);
   }
   else{//create a new bucket and return its first element
-    b->next=createBucket(b->max);
+    b->next=createVocBucket(b->max);
     return b->words[0];
   }
 
@@ -62,14 +62,14 @@ Word* searchVocBucket(VocBucket *b, char* str){
 
 void printVocBucket(VocBucket* bucket){
   for(int i=0;i<bucket->max;i++){
-    if(!strcmp(bucket->words[i]->id,"-" )){
+    if(!strcmp(bucket->words[i]->str,"-" )){
       return;
     }
-    printf("%s\n",bucket->words[i]->id);
+    printf("%s\n",bucket->words[i]->str);
   }
   if(bucket->next!=NULL){
     printf("Printing next bucket!\n");
-    printBucket(bucket->next);
+    printVocBucket(bucket->next);
   }
 }
 

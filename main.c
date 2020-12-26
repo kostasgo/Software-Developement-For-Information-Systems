@@ -8,6 +8,7 @@
 #include "hashtable.h"
 #include "create-output.h"
 #include "linkedlist.h"
+#include "vocabulary.h"
 
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
