@@ -128,13 +128,13 @@ void printSpecs(Specs* specs){
   and then all the pairs of keys and values it contains calling the printKV() function for each pair.
   */
 
-  SpecsNode *current_node = specs->list;
+  CorrectNode *current_node = specs->words;
 
-  printf ("Spec ID: %s\n\nPairs of keys and values for this Spec ID\n", specs->id);
+//  printf ("Spec ID: %s\n\nPairs of keys and values for this Spec ID\n", specs->id);
 
-  for(int i = 0; i < specs->size; i++){
-	   printKV(current_node->data);
-	current_node = current_node->next;
+  while(current_node!=NULL){
+    printf("WORD: %s||COUNTER: %d\n",current_node->word, current_node->counter);
+    current_node = current_node->next;
   }
 
 }

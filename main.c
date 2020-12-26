@@ -83,7 +83,8 @@ int main(int argc, char* argv[]){
   deleteStopWordsTable(stopwords);
 
   deleteDirTable(directories, numOfDirectories);
-
+  Specs* test=searchList(specsList, "www.pricedekho.com//754");
+  printSpecs(test);
 
 //  Specs* specs=parser("www.alibaba.com","34956.json");
 //  printSpecs(specs);
