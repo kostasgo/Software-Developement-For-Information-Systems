@@ -53,6 +53,7 @@ Specs* createSpecs(char* id){
   specs->size=0;
   specs->id=strdup(id);
   specs->words=NULL;
+  specs->total=0;
 
   return specs;
 }
@@ -100,7 +101,7 @@ void insertCorrect(Specs ** specs, char* str){
   n->word = strdup(str);
   n->counter = 1;
   n->next = NULL;
-
+  (*specs)->total++;
 
   if((*specs)->words==NULL) {
     //printf("Inserting specs %d at first node\n",p->id);
@@ -130,7 +131,7 @@ void printSpecs(Specs* specs){
 
   CorrectNode *current_node = specs->words;
 
-//  printf ("Spec ID: %s\n\nPairs of keys and values for this Spec ID\n", specs->id);
+  printf ("SPEC ID: %s\n\nTOTAL WORDS: %d\n\n", specs->id, specs->total);
 
   while(current_node!=NULL){
     printf("WORD: %s||COUNTER: %d\n",current_node->word, current_node->counter);

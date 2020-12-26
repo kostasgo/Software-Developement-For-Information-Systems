@@ -3,6 +3,10 @@
 #include <string.h>
 #include <ctype.h>
 #include "specs.h"
+#include "hashtable.h"
+#include "vocabulary.h"
+#include "words.h"
+
 
 void toLower(char* s){
   /*
@@ -94,7 +98,7 @@ void filterSpec(Specs* specs, char** stopwords){
 
         toLower(currentString);
         cleanString(currentString);
-        if(strlen(currentString) == 1){ continue; }
+        if(strlen(currentString) <= 1){ continue; }
         if(isStopword(currentString, stopwords)){ continue; }
         insertCorrect(&specs, currentString);
       }
@@ -104,4 +108,98 @@ void filterSpec(Specs* specs, char** stopwords){
 
   }
   deleteSpecsList(specs->list);
+}
+
+
+VocTable* createVocTable(int size, int bucketSize){
+  /*
+  Creates and returns an empty Vocabulary Table of given size. A VocTable
+  created by this function should always be deleted by deleteVocTable().
+  */
+
+  VocTable *table = (VocTable*)malloc(sizeof(VocTable));
+  table->array=(VocBucket **)malloc(sizeof(VocBucket*)*size);
+  table->max=size;
+  table->total=0;
+
+  for(int i=0;i<size;i++){
+    table->array[i]=createVocBucket(bucketSize);
+  }
+  return table;
+}
+
+
+void insertVocTable(VocTable **table, char *str){
+  /*
+  Inserts a word into the Vocabulary Table. Finds the right position
+  and then tries to put it in the VocBucket. If it already exists, we just increase the words counter
+  */
+
+
+  int pos = compress(hash(str),(*table)->max); //find the position to enter
+  VocBucket *b= (*table)->array[pos];//get its VocBucket
+
+  Word *word = searchVocBucket(b, str);//find the first available space in the VocBucket
+
+  if(!strcmp(word->str,str)){ //if the word was actually found just increase the counter
+    word->counter++;
+    return;
+  }
+
+  //Otherwise, an empty word was returned.
+  (*table)->total++;
+  free(word->str);
+  word->str=strdup(str); //rename the Word to the file's id
+  word->counter++;
+
+
+}
+
+void fillVocabulary(VocTable **table, ListNode* specsList){
+  ListNode* node=specsList;
+  while(node!=NULL){
+    CorrectNode *current=node->specs->words;
+    while(current!=NULL){
+      insertVocTable(table, current->word);
+      current=current->next;
+
+    }
+    node=node->next;
+  }
+}
+
+void deleteVocTable(VocTable* table){
+    /*
+      Deletes the given VocTable.
+    */
+  for(int i=0;i<table->max;i++){
+    deleteVocBucket(table->array[i]);
+  }
+  free(table->array);
+  free(table);
+}
+
+Word* searchVocTable(VocTable* table, char* str){
+  /*
+    Searches inside the VocTable to find the spec
+    with the given key, and returns the cell where the clique is.
+  */
+
+  int pos = compress(hash(str),table->max); //the position where it should be
+
+
+  Word* word= searchVocBucket(table->array[pos], str);
+
+  return word;
+
+}
+
+
+void printVocTable(VocTable* table){
+
+  for(int i=0;i<table->max;i++){
+    printf("VocBucket %d:\n",i);
+    printVocBucket(table->array[i]);
+  }
+  printf("\n");
 }

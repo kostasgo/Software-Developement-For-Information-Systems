@@ -16,7 +16,7 @@ typedef struct VocBucketType{
 Word* createWord(char*);
 void deleteWord(Word*);
 VocBucket* createVocBucket(int);
-VocBucket* createVocBucket(int);
+Word* searchVocBucket(VocBucket *, char*);
 void printVocBucket(VocBucket*);
 void deleteVocBucket(VocBucket*);
 

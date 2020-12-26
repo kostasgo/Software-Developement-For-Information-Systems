@@ -9,6 +9,7 @@
 #include "create-output.h"
 #include "linkedlist.h"
 #include "vocabulary.h"
+#include "words.h"
 
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
@@ -17,6 +18,8 @@
 
 #define HASHTABLE_SIZE 30000
 #define BUCKET_SIZE 4
+#define VOCABULARY_TABLE_SIZE 10000
+#define VOCABULARY_BUCKETSIZE 6
 
 int main(int argc, char* argv[]){
 
@@ -49,6 +52,7 @@ int main(int argc, char* argv[]){
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
+  VocTable* vocabulary = createVocTable(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
 
   //Access Files
   int numOfFiles, numOfDirectories;
@@ -81,10 +85,13 @@ int main(int argc, char* argv[]){
     deletePath(path);
   }
   deleteStopWordsTable(stopwords);
+  fillVocabulary(&vocabulary, specsList);
 
   deleteDirTable(directories, numOfDirectories);
   Specs* test=searchList(specsList, "www.pricedekho.com//754");
   printSpecs(test);
+
+  printf("Total is: %d\n",vocabulary->total);
 
 //  Specs* specs=parser("www.alibaba.com","34956.json");
 //  printSpecs(specs);

@@ -34,6 +34,7 @@ typedef struct SpecsType{
   int size;
   char* id;
   CorrectNode* words;
+  int total;
 } Specs;
 
 
