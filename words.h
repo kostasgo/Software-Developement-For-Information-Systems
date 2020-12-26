@@ -13,13 +13,11 @@ typedef struct VocBucketType{
 }VocBucket;
 
 
-WordBucketData* createWordBucketData(char *,Clique*);
-void deleteWordBucketData(WordBucketData*);
-WordBucket* createWordBucket(int);
-
-WordBucketData* searchWordBucket(WordBucket *, char*);
-//void bucketInsert(Bucket**, BucketData*);
-void printWordBucket(WordBucket*);
-void deleteWordBucket(WordBucket*);
+Word* createWord(char*);
+void deleteWord(Word*);
+VocBucket* createVocBucket(int);
+VocBucket* createVocBucket(int);
+void printVocBucket(VocBucket*);
+void deleteVocBucket(VocBucket*);
 
 #endif

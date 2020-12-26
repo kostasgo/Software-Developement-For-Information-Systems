@@ -6,7 +6,7 @@
 Word* createWord(char * str){
   Word *word= (Word*)malloc(sizeof(Word));
   word->str = strdup(str);
-  word->counter =0;
+  word->counter = 0;
 
   return word;
 }
