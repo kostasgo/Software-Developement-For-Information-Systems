@@ -40,12 +40,12 @@ VocBucket* createVocBucket(int size){
 Word* searchVocBucket(VocBucket *b, char* str){
   for(int i=0;i<b->max;i++){
     //if the string is found, return its word
-    if(!strcmp(b->Word[i]->id,str)){
-      return b->Word[i];
+    if(!strcmp(b->words[i]->id,str)){
+      return b->words[i];
     }
     //if "-" is found (sign for empty Word) return this empty Word
-    if(!strcmp(b->Word[i]->id,"-")){
-      return b->Word[i];
+    if(!strcmp(b->words[i]->id,"-")){
+      return b->words[i];
     }
   }
   //if it reaches this point, then we must look in the next bucket
@@ -54,7 +54,7 @@ Word* searchVocBucket(VocBucket *b, char* str){
   }
   else{//create a new bucket and return its first element
     b->next=createBucket(b->max);
-    return b->Word[0];
+    return b->words[0];
   }
 
 }
@@ -62,10 +62,10 @@ Word* searchVocBucket(VocBucket *b, char* str){
 
 void printVocBucket(VocBucket* bucket){
   for(int i=0;i<bucket->max;i++){
-    if(!strcmp(bucket->Word[i]->id,"-" )){
+    if(!strcmp(bucket->words[i]->id,"-" )){
       return;
     }
-    printf("%s\n",bucket->Word[i]->id);
+    printf("%s\n",bucket->words[i]->id);
   }
   if(bucket->next!=NULL){
     printf("Printing next bucket!\n");
@@ -77,9 +77,9 @@ void deleteVocBucket(VocBucket* b){
   VocBucket* next;
   while(b != NULL){
     for(int i=0;i<b->max;i++){
-      deleteWord(b->Word[i]);
+      deleteWord(b->words[i]);
     }
-    free(b->Word);
+    free(b->words);
     next = b->next;
     free(b);
     b=next;
