@@ -18,15 +18,18 @@ void toLower(char* s){
 }
 
 void cleanString(char* s){
-  int len=strlen(s);
-  for(int i=0; i<len; i++){
-    if(!isalnum(s[i]) || s[i]==','){
-      for(int j=i; j<len; j++){
-        s[j]=s[j+1];
-      }
-      s[len-1]='\0';
-    }
+  
+  int i, j = 0;
+  
+  for (i = 0; i < strlen(s); i++){
+	  if(isalnum(s[i])){
+		  s[j] = s[i];
+		  j++;
+	  }
   }
+  
+  if(j < strlen(s))
+	s[j] = '\0';
 }
 
 char** createStopWordsTable(){
@@ -94,12 +97,23 @@ void filterSpec(Specs* specs, char** stopwords){
     Value* tempVal = temp->data->value;
     while(tempVal!=NULL){
       char* currentString;
+      char* temp;
+      
       while( (currentString = strsep(&(tempVal->str), " ")) != NULL){
 
         toLower(currentString);
         cleanString(currentString);
         if(strlen(currentString) <= 1){ continue; }
         if(isStopword(currentString, stopwords)){ continue; }
+        if ((temp = malloc((strlen(currentString) + 1) * sizeof(char))) == NULL){
+			perror("malloc failed");
+			exit(EXIT_FAILURE);
+		}
+
+        memcpy(temp, currentString, strlen(currentString));
+        temp[strlen(currentString)] = '\0';
+        currentString = strdup(temp);
+        free(temp);
         insertCorrect(&specs, currentString);
       }
       tempVal = tempVal->next;
