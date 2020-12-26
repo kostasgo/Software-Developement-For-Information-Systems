@@ -82,7 +82,7 @@ void filterSpec(Specs* specs, char** stopwords){
         if (strlen(currentString) == 1){ continue; }
         if (isStopword(currentString, stopwords)){ continue; }
         toLower(currentString);
-        insertWord(&(specs->words), currentString);
+        insertCorrect(&specs, currentString);
       }
       tempVal = tempVal->next;
     }
@@ -90,17 +90,4 @@ void filterSpec(Specs* specs, char** stopwords){
 
   }
   deleteSpecsList(specs->list);
-}
-
-int main(){
-  char* test=strdup("HeLlo\t frIeNDS\nxD\n");
-  toLower(test);
-  printf("%s",test);
-  char** stopwords=createStopWordsTable();
-
-
-  printf("%d\n", isStopword(test, stopwords));
-  printf("%d\n", isStopword("your", stopwords));
-  deleteStopWordsTable(stopwords);
-  free(test);
 }

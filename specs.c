@@ -89,6 +89,38 @@ void insertSpecs(Specs** specs, KV_Pair* data){
 
 }
 
+void insertCorrect(Specs ** specs, char* str){
+  /*
+  Inserts a word to the list of filtered words in the spec
+  */
+  CorrectNode *n;
+  //printf("Another insert\n");
+
+  n = (CorrectNode *)malloc(sizeof(CorrectNode));
+  n->word = strdup(str);
+  n->counter = 1;
+  n->next = NULL;
+
+
+  if((*specs)->words==NULL) {
+    //printf("Inserting specs %d at first node\n",p->id);
+    (*specs)->words = n;
+    return;
+  }
+  CorrectNode *temp=(*specs)->words;
+
+  while(temp->next!= NULL){
+    if(!strcmp(temp->word,str)){
+      free(n);
+      temp->counter++;
+      return;
+    }
+    temp=temp->next;
+  }
+
+  temp->next=n;
+}
+
 
 void printSpecs(Specs* specs){
   /*
@@ -110,7 +142,7 @@ void printSpecs(Specs* specs){
 
 void deleteSpecsList(SpecsNode *list){
   /*
-  A recursiv function to delete the list element of Specs. It frees
+  A function to delete the list element of Specs. It frees
   the nodes and also deletes the key-value pairs inside them.
   */
   SpecsNode* next;
@@ -124,12 +156,25 @@ void deleteSpecsList(SpecsNode *list){
 
 }
 
+void deleteCorrectList(CorrectNode *list){
+  /*
+  Deletes a the list of corrected words
+  */
+  CorrectNode* next;
+  while(list != NULL){
+    free(list->word);
+    next = list->next;
+    free(list);
+    list=next;
+  }
+}
+
 
 /*
 Deletes a Specs struct, doing the apropriate frees.
 */
 void deleteSpecs(Specs* specs){
-  deleteSpecsList(specs->list);
+
   free(specs->id);
   free(specs);
 }

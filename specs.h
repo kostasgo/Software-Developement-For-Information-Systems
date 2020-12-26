@@ -38,11 +38,13 @@ typedef struct SpecsType{
 
 
 char* createSpecsID(char*, char*);
+void insertCorrect(Specs **, char*);
 void deleteSpecsId(char*);
 Specs* createSpecs(char*);
 void insertSpecs(Specs**, KV_Pair*);
 void printSpecs(Specs*);
 void deleteSpecsList(SpecsNode *);
+void deleteCorrectList(CorrectNode *);
 void deleteSpecs(Specs*);
 
 #endif
