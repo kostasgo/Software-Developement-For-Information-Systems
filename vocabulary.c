@@ -13,6 +13,18 @@ void toLower(char* s){
   }
 }
 
+void cleanString(char* s){
+  int len=strlen(s);
+  for(int i=0; i<len; i++){
+    if(!isalnum(s[i]) || s[i]==','){
+      for(int j=i; j<len; j++){
+        s[j]=s[j+1];
+      }
+      s[len-1]='\0';
+    }
+  }
+}
+
 char** createStopWordsTable(){
   /*
   Creates a table of all the stopwords in the stopwords.csv. Table should be deleted with
@@ -79,13 +91,11 @@ void filterSpec(Specs* specs, char** stopwords){
     while(tempVal!=NULL){
       char* currentString;
       while( (currentString = strsep(&(tempVal->str), " ")) != NULL){
-        if (strlen(currentString) == 1){ continue; }
-        if (isStopword(currentString, stopwords)){ continue; }
+
         toLower(currentString);
-        if(currentString[strlen(currentString)-1]==','||currentString[strlen(currentString)-1]=='.'||currentString[strlen(currentString)-1]==')'||currentString[strlen(currentString)-1]==':'){
-          //printf("spotted!\n");
-          currentString[strlen(currentString)-1]=='\0';
-        }
+        cleanString(currentString);
+        if(strlen(currentString) == 1){ continue; }
+        if(isStopword(currentString, stopwords)){ continue; }
         insertCorrect(&specs, currentString);
       }
       tempVal = tempVal->next;
