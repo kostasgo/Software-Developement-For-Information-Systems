@@ -10,17 +10,20 @@ void mergeCliques(Hashtable* table, char* id1, char* id2){
   BucketData* data1=searchHashtable(table, id1);
 	BucketData* data2=searchHashtable(table, id2);
 
-  if(compareCliques(data1->clique,data2->clique)){return;}
 
   if(data1->clique==NULL){
-		printf("%s not in hashtable\n",id1);
+	//	printf("%s not in hashtable\n",id1);
 		return;
 	}
 	if(data2->clique==NULL){
-		printf("%s not in hashtable\n",id2);
+		//printf("%s not in hashtable\n",id2);
 		return;
 	}
   BucketData *new, *old;
+
+  if(compareCliques(data1->clique,data2->clique)){return;}
+
+
   if(data1->clique->size>=data2->clique->size){
     new = data1;
     old = data2;
