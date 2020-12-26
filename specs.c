@@ -52,6 +52,7 @@ Specs* createSpecs(char* id){
   specs->list=NULL;
   specs->size=0;
   specs->id=strdup(id);
+  specs->words=NULL;
 
   return specs;
 }
