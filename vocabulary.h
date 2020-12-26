@@ -1,8 +1,8 @@
 #ifndef vocabulary_h
 #define vocabulary_h
 
-typedef struct VocBucketType{
-
+typedef struct VocTable{
+  
 }
 
 void toLower(char*);

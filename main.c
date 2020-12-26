@@ -45,7 +45,7 @@ int main(int argc, char* argv[]){
   }
 
 
-
+  char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
 
@@ -70,9 +70,7 @@ int main(int argc, char* argv[]){
       //Parse each .json file and insert it into the hashtable
       specs= parser(directories[i],files[j]);
 
-
-
-
+      filterSpec(specs, stopwords);
       insertList(&specsList, specs);
       insertHashtable(&cliques,specs);
       specs=NULL;
@@ -81,6 +79,7 @@ int main(int argc, char* argv[]){
     deleteDirTable(files, numOfFiles);
     deletePath(path);
   }
+  deleteStopWordsTable(stopwords);
 
   deleteDirTable(directories, numOfDirectories);
 
@@ -99,7 +98,7 @@ int main(int argc, char* argv[]){
   int c=0;
   while(getline(&line, &len, fp) != -1){
     //printf("%s\n",line);
-    parseCsv(line, cliques);
+    //parseCsv(line, cliques);
     c++;
   }
 
