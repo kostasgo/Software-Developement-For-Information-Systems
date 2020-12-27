@@ -3,7 +3,9 @@
 #include <stdlib.h>
 
 void insertNegatives(NegListNode** list, Clique* clique){
-
+  /*
+  Inserts a node into a list of Cliques.
+  */
   NegListNode *n = (NegListNode *)malloc(sizeof(NegListNode));
   n->clique = clique;
   n->next = NULL;
@@ -14,12 +16,29 @@ void insertNegatives(NegListNode** list, Clique* clique){
   }
   NegListNode *temp=*list;
   while(temp->next!= NULL){
-    if(compareCliques(temp->clique,clique)){
+    if(compareCliques(temp->clique,clique)){ //if clique is already noted as a negative we just stop
       return;
     }
     temp=temp->next;
   }
 
   temp->next=n;
+
+}
+
+void deleteNegatives(NegListNode* list){
+  /*
+  Deletes the space allocated for the nodes of the list of
+  negative cliques(without deleting the respective cliques)
+  */
+
+  NegListNode *temp=list;
+  NegListNode* next;
+
+  while(list != NULL){
+    next = list->next;
+    free(list);
+    list=next;
+  }
 
 }

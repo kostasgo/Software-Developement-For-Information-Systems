@@ -1,3 +1,13 @@
+/*
+This is a project created for the module "Software Developement for Information Systems"
+for the Univercity of Athens, Department of Informatics.
+
+Authors: Konstantinos Gkogkas, Nikolaos Sentis
+
+Compile: make
+Run: ./disambugator
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,6 +31,8 @@
 #define VOCABULARY_TABLE_SIZE 10000
 #define VOCABULARY_BUCKETSIZE 6
 
+#define MARGIN 0.0029
+
 int main(int argc, char* argv[]){
 
   char* inputFile;
@@ -33,13 +45,13 @@ int main(int argc, char* argv[]){
   if(argc == 1){
 
     inputFile=strdup(MEDIUM);
-    printf("Running with medium file! (Default)\n");
+    printf("Running with medium file! (Default)\n\n");
   }
   if(argc == 2){
     if(!strcmp(argv[1],"-l")){
 
       inputFile=strdup(LARGE);
-      printf("Running with large file!\n");
+      printf("Running with large file!\n\n");
     }
     else{
       printf("Usage: ./disambugator (-l)\n");
@@ -52,7 +64,7 @@ int main(int argc, char* argv[]){
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
-  BoW* bow = createBoW(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
+  Vocabulary* vocabulary = createVocabulary(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
 
   //Access Files
   int numOfFiles, numOfDirectories;
@@ -85,17 +97,20 @@ int main(int argc, char* argv[]){
     deletePath(path);
   }
   deleteStopWordsTable(stopwords);
-  fillVocabulary(&bow, specsList);
-
   deleteDirTable(directories, numOfDirectories);
-  Specs* test=searchList(specsList, "www.ebay.com//24085");
-  printSpecs(test);
 
-  printf("Total is: %d\n",bow->total);
+  printf("\nCreating Bag Of Words...\n");
+  int totalSpecs=fillVocabulary(&vocabulary, specsList);
+  
+  updateScores(vocabulary, totalSpecs);
+  //printVocabulary(vocabulary);
+  int bowSize=-1;
+  Word** bow=shrinkTable(vocabulary,MARGIN, &bowSize);
+  //printf("%d\n",size);
 
-//  Specs* specs=parser("www.alibaba.com","34956.json");
-//  printSpecs(specs);
-
+  for(int i=0; i<bowSize;i++){
+    printf("%d %s\n",i, bow[i]->str);
+  }
   FILE *fp;
   fp = fopen(inputFile, "r");
   if(fp == NULL){
@@ -105,18 +120,21 @@ int main(int argc, char* argv[]){
   char *line = NULL;
   size_t len=0;
   int c=0;
+  printf("\nGoing through %s...\n",inputFile);
   while(getline(&line, &len, fp) != -1){
     //printf("%s\n",line);
-    //parseCsv(line, cliques);
+    parseCsv(line, cliques);
     c++;
   }
 
   //printHashtable(cliques);
   //printf("Num of lines: %d\n",c);
+  printf("\nFinished!\n");
   free(line);
 
   free(inputFile);
   outputToFile(cliques);
+  deleteVocabulary(vocabulary);
   deleteList(specsList);
   deleteHashtable(cliques);
 

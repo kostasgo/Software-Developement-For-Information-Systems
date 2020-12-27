@@ -123,6 +123,7 @@ void insertCorrect(Specs ** specs, char* str){
 }
 
 
+
 void printSpecs(Specs* specs){
   /*
   Takes as input a pointer to Specs and prints its id
@@ -171,11 +172,11 @@ void deleteCorrectList(CorrectNode *list){
 }
 
 
-/*
-Deletes a Specs struct, doing the apropriate frees.
-*/
-void deleteSpecs(Specs* specs){
 
+void deleteSpecs(Specs* specs){
+  /*
+  Deletes a Specs struct, doing the apropriate frees.
+  */
   free(specs->id);
   free(specs);
 }

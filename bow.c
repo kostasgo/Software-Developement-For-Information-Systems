@@ -139,13 +139,13 @@ void filterSpec(Specs* specs, char** stopwords){
 }
 
 
-BoW* createBoW(int size, int bucketSize){
+Vocabulary* createVocabulary(int size, int bucketSize){
   /*
-  Creates and returns an empty Vocabulary Table of given size. A BoW
-  created by this function should always be deleted by deleteBoW().
+  Creates and returns an empty Vocabulary Table of given size. A Vocabulary
+  created by this function should always be deleted by deleteVocabulary().
   */
 
-  BoW *table = (BoW*)malloc(sizeof(BoW));
+  Vocabulary *table = (Vocabulary*)malloc(sizeof(Vocabulary));
   table->array=(VocBucket **)malloc(sizeof(VocBucket*)*size);
   table->max=size;
   table->total=0;
@@ -157,48 +157,116 @@ BoW* createBoW(int size, int bucketSize){
 }
 
 
-void insertBoW(BoW **table, char *str){
+void insertVocabulary(Vocabulary **table, char* str, double tf){
   /*
   Inserts a word into the Vocabulary Table. Finds the right position
-  and then tries to put it in the VocBucket. If it already exists, we just increase the words counter
+  and then tries to put it in the VocBucket. If it already exists,
+  we just increase the words counter.
   */
-
 
   int pos = compress(hash(str),(*table)->max); //find the position to enter
   VocBucket *b= (*table)->array[pos];//get its VocBucket
 
   Word *word = searchVocBucket(b, str);//find the first available space in the VocBucket
 
+  word->counter++;
+  word->tf_sum+=tf;
+  //printf("%lf\n",word->tf_sum);
   if(!strcmp(word->str,str)){ //if the word was actually found just increase the counter
-    word->counter++;
+
     return;
   }
 
   //Otherwise, an empty word was returned.
   (*table)->total++;
   free(word->str);
-  word->str=strdup(str); //rename the Word to the file's id
-  word->counter++;
-
+  word->str=strdup(str); //rename the Word
 
 }
 
-void fillVocabulary(BoW **table, ListNode* specsList){
+int fillVocabulary(Vocabulary **table, ListNode* specsList){
+  /*
+  Updates the vocabulary by entering each word that is found
+  in the entirety of the Dataset X. Returns the number of json
+  files in the Dataset.
+  */
   ListNode* node=specsList;
+  int totalSpecs=0;
   while(node!=NULL){
     CorrectNode *current=node->specs->words;
+    int total = node->specs->total;
     while(current!=NULL){
-      insertBoW(table, current->word);
+
+      double tf=(double)current->counter/(double)total; //calculate the word's tf
+      //printf("%lf\n",tf);
+      insertVocabulary(table, current->word, tf);
       current=current->next;
 
+
     }
+    totalSpecs++;
     node=node->next;
   }
+  return totalSpecs;
 }
 
-void deleteBoW(BoW* table){
+void updateScores(Vocabulary* table, int totalFiles){
+  for(int i=0;i<table->max;i++){
+    updateTfIdfScore(table->array[i],totalFiles);
+  }
+
+}
+
+Word** shrinkTable(Vocabulary* table, double margin, int* size){
+  /*
+  Runs the Vocabulary table and changes the index of every word
+  that has a better score than the margin to a number, starting from 0.
+  Then creates a table of words, where each word is in the position that their index
+  indicates.
+  */
+  int counter=0;
+  for(int i=0;i<table->max;i++){
+    VocBucket* b=table->array[i];
+    while(b!=NULL){
+      for(int j=0;j<b->max;j++){
+        if(!strcmp(b->words[j]->str,"-")){
+          break;
+        }
+        if(b->words[j]->tfidf_score>=margin){
+          b->words[j]->index=counter;
+          
+          counter++;
+        }
+      }
+      b=b->next;
+    }
+
+  }
+  *size=counter;
+  Word** bow=(Word**)malloc(sizeof(Word*)*counter);
+
+  for(int i=0;i<table->max;i++){
+    VocBucket* b=table->array[i];
+    while(b!=NULL){
+      for(int j=0;j<b->max;j++){
+        if(!strcmp(b->words[j]->str,"-")){
+          break;
+        }
+        if(b->words[j]->index!=-1){
+          bow[b->words[j]->index]=b->words[j];
+
+        }
+      }
+      b=b->next;
+    }
+
+  }
+  return bow;
+}
+
+void deleteVocabulary(Vocabulary* table){
     /*
-      Deletes the given BoW.
+      Deletes the given Vocabulary.
     */
   for(int i=0;i<table->max;i++){
     deleteVocBucket(table->array[i]);
@@ -207,9 +275,9 @@ void deleteBoW(BoW* table){
   free(table);
 }
 
-Word* searchBoW(BoW* table, char* str){
+Word* searchVocabulary(Vocabulary* table, char* str){
   /*
-    Searches inside the BoW to find the spec
+    Searches inside the Vocabulary to find the spec
     with the given key, and returns the cell where the clique is.
   */
 
@@ -223,10 +291,10 @@ Word* searchBoW(BoW* table, char* str){
 }
 
 
-void printBoW(BoW* table){
+void printVocabulary(Vocabulary* table){
 
   for(int i=0;i<table->max;i++){
-    printf("VocBucket %d:\n",i);
+    printf("Bucket %d:\n",i);
     printVocBucket(table->array[i]);
   }
   printf("\n");

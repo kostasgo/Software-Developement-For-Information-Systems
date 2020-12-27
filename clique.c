@@ -56,14 +56,13 @@ void insertClique(Clique** clique, Specs* specs){
 void deleteCliqueList(CliqueNode *list){
   /*
   A recursiv function to delete the list element of Clique. It frees
-  the nodes and also deletes the specs inside them.
+  the nodes. Does not delete the specs inside them, as they are malloc'd
+  elsewhere
   */
   CliqueNode *temp=list;
   CliqueNode* next;
 
   while(list != NULL){
-
-    deleteSpecs(list->specs);
     next = list->next;
     free(list);
     list=next;
@@ -107,8 +106,15 @@ void deleteClique(Clique* clique){
   /*
   Deletes a Clique struct, doing the apropriate frees.
   */
+  if(clique!=NULL){
+    if(clique->negatives!=NULL){
+      deleteNegatives(clique->negatives);
+    }
 
-  free(clique);
+    deleteCliqueList(clique->list);
+    free(clique);
+  }
+
 
 
 }

@@ -4,22 +4,25 @@
 #include "words.h"
 #include "linkedlist.h"
 
-typedef struct BoWType{
+typedef struct VocabularyType{
   int max;
   VocBucket** array;
   int total;
-}BoW;
+}Vocabulary;
+
 
 void toLower(char*);
 char** createStopWordsTable();
 void deleteStopWordsTable(char**);
 int isStopword(char*, char**);
 void filterSpec(Specs*, char**);
-BoW* createBoW(int, int);
-void insertBoW(BoW **, char *);
-void fillVocabulary(BoW **, ListNode*);
-void deleteBoW(BoW*);
-Word* searchBoW(BoW*, char*);
-void printBoW(BoW*);
+Vocabulary* createVocabulary(int, int);
+void insertVocabulary(Vocabulary **, char *, double);
+int fillVocabulary(Vocabulary **, ListNode*);
+void updateScores(Vocabulary*, int);
+Word** shrinkTable(Vocabulary*, double, int*);
+void deleteVocabulary(Vocabulary*);
+Word* searchVocabulary(Vocabulary*, char*);
+void printVocabulary(Vocabulary*);
 
 #endif
