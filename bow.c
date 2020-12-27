@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "specs.h"
 #include "hashtable.h"
-#include "vocabulary.h"
+#include "bow.h"
 #include "words.h"
 
 
@@ -12,24 +12,38 @@ void toLower(char* s){
   /*
   Converts a string to lowercase
   */
+
   for(int i=0; s[i]; i++){
     s[i]=tolower(s[i]);
   }
 }
 
 void cleanString(char* s){
-  
-  int i, j = 0;
-  
-  for (i = 0; i < strlen(s); i++){
-	  if(isalnum(s[i])){
-		  s[j] = s[i];
-		  j++;
-	  }
+  char* needle;
+  while( (needle = strstr(s, "\\n"))!=NULL ){
+    needle[0]=' ';
+    needle[1]=' ';
   }
-  
-  if(j < strlen(s))
-	s[j] = '\0';
+  while( (needle = strstr(s, "\\u"))!=NULL ){
+    needle[0]=' ';
+    needle[1]=' ';
+    needle[2]=' ';
+    needle[3]=' ';
+    needle[4]=' ';
+    needle[5]=' ';
+  }
+  int i, j = 0;
+
+  for (i = 0; i < strlen(s); i++){
+	  if(ispunct(s[i])){
+		  s[i] = ' ';
+		  //j++;
+	  }
+    s[i]=tolower(s[i]);
+  }
+
+  //if(j < strlen(s))
+	//s[j] = '\0';
 }
 
 char** createStopWordsTable(){
@@ -98,17 +112,17 @@ void filterSpec(Specs* specs, char** stopwords){
     while(tempVal!=NULL){
       char* currentString;
       char* temp;
-      
+      cleanString(tempVal->str);
       while( (currentString = strsep(&(tempVal->str), " ")) != NULL){
 
-        toLower(currentString);
-        cleanString(currentString);
+        //toLower(currentString);
+
         if(strlen(currentString) <= 1){ continue; }
         if(isStopword(currentString, stopwords)){ continue; }
         if ((temp = malloc((strlen(currentString) + 1) * sizeof(char))) == NULL){
-			perror("malloc failed");
-			exit(EXIT_FAILURE);
-		}
+			       perror("malloc failed");
+			       exit(EXIT_FAILURE);
+		    }
 
         memcpy(temp, currentString, strlen(currentString));
         temp[strlen(currentString)] = '\0';
@@ -125,13 +139,13 @@ void filterSpec(Specs* specs, char** stopwords){
 }
 
 
-VocTable* createVocTable(int size, int bucketSize){
+BoW* createBoW(int size, int bucketSize){
   /*
-  Creates and returns an empty Vocabulary Table of given size. A VocTable
-  created by this function should always be deleted by deleteVocTable().
+  Creates and returns an empty Vocabulary Table of given size. A BoW
+  created by this function should always be deleted by deleteBoW().
   */
 
-  VocTable *table = (VocTable*)malloc(sizeof(VocTable));
+  BoW *table = (BoW*)malloc(sizeof(BoW));
   table->array=(VocBucket **)malloc(sizeof(VocBucket*)*size);
   table->max=size;
   table->total=0;
@@ -143,7 +157,7 @@ VocTable* createVocTable(int size, int bucketSize){
 }
 
 
-void insertVocTable(VocTable **table, char *str){
+void insertBoW(BoW **table, char *str){
   /*
   Inserts a word into the Vocabulary Table. Finds the right position
   and then tries to put it in the VocBucket. If it already exists, we just increase the words counter
@@ -169,12 +183,12 @@ void insertVocTable(VocTable **table, char *str){
 
 }
 
-void fillVocabulary(VocTable **table, ListNode* specsList){
+void fillVocabulary(BoW **table, ListNode* specsList){
   ListNode* node=specsList;
   while(node!=NULL){
     CorrectNode *current=node->specs->words;
     while(current!=NULL){
-      insertVocTable(table, current->word);
+      insertBoW(table, current->word);
       current=current->next;
 
     }
@@ -182,9 +196,9 @@ void fillVocabulary(VocTable **table, ListNode* specsList){
   }
 }
 
-void deleteVocTable(VocTable* table){
+void deleteBoW(BoW* table){
     /*
-      Deletes the given VocTable.
+      Deletes the given BoW.
     */
   for(int i=0;i<table->max;i++){
     deleteVocBucket(table->array[i]);
@@ -193,9 +207,9 @@ void deleteVocTable(VocTable* table){
   free(table);
 }
 
-Word* searchVocTable(VocTable* table, char* str){
+Word* searchBoW(BoW* table, char* str){
   /*
-    Searches inside the VocTable to find the spec
+    Searches inside the BoW to find the spec
     with the given key, and returns the cell where the clique is.
   */
 
@@ -209,7 +223,7 @@ Word* searchVocTable(VocTable* table, char* str){
 }
 
 
-void printVocTable(VocTable* table){
+void printBoW(BoW* table){
 
   for(int i=0;i<table->max;i++){
     printf("VocBucket %d:\n",i);

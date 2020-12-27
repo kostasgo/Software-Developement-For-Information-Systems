@@ -8,7 +8,7 @@
 #include "hashtable.h"
 #include "create-output.h"
 #include "linkedlist.h"
-#include "vocabulary.h"
+#include "bow.h"
 #include "words.h"
 
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
-  VocTable* vocabulary = createVocTable(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
+  BoW* bow = createBoW(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
 
   //Access Files
   int numOfFiles, numOfDirectories;
@@ -85,13 +85,13 @@ int main(int argc, char* argv[]){
     deletePath(path);
   }
   deleteStopWordsTable(stopwords);
-  fillVocabulary(&vocabulary, specsList);
+  fillVocabulary(&bow, specsList);
 
   deleteDirTable(directories, numOfDirectories);
-  Specs* test=searchList(specsList, "www.pricedekho.com//754");
+  Specs* test=searchList(specsList, "www.ebay.com//24085");
   printSpecs(test);
 
-  printf("Total is: %d\n",vocabulary->total);
+  printf("Total is: %d\n",bow->total);
 
 //  Specs* specs=parser("www.alibaba.com","34956.json");
 //  printSpecs(specs);

@@ -1,9 +1,9 @@
 CC = gcc
 EXEC = disambugator
 TEST = test
-SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c negative-cliques.c vocabulary.c words.c
-HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h vocabulary.h words.h
-OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o bucket.o linkedlist.o negative-cliques.o vocabulary.o words.o
+SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c negative-cliques.c bow.c words.c
+HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h bow.h words.h
+OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o bucket.o linkedlist.o negative-cliques.o bow.o words.o
 OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o negative-cliques.o create-output.o
 FLAGS = -g3 -c
 
@@ -27,8 +27,8 @@ words.o:
 negative-cliques.o:
 	$(CC) $(FLAGS) negative-cliques.c
 
-vocabulary.o:
-	$(CC) $(FLAGS) vocabulary.c
+bow.o:
+	$(CC) $(FLAGS) bow.c
 
 linkedlist.o:
 	$(CC) $(FLAGS) linkedlist.c

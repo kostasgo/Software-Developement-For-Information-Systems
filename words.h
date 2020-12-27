@@ -4,6 +4,7 @@
 typedef struct WordType{
   char* str;
   int counter;
+  int index;
 }Word;
 
 typedef struct VocBucketType{
