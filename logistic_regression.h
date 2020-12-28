@@ -7,7 +7,7 @@ typedef struct LogisticRegressionType{
   double* w;
   double* x;
   double lr;
-  double e;
+  
 }LogisticRegression;
 
 LogisticRegression* createLogisticRegression(int);
