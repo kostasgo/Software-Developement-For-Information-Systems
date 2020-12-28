@@ -199,6 +199,7 @@ int fillVocabulary(Vocabulary **table, ListNode* specsList){
 
       double tf=(double)current->counter/(double)total; //calculate the word's tf
       //printf("%lf\n",tf);
+      current->tf=tf;
       insertVocabulary(table, current->word, tf);
       current=current->next;
 
@@ -234,7 +235,7 @@ Word** shrinkTable(Vocabulary* table, double margin, int* size){
         }
         if(b->words[j]->tfidf_score>=margin){
           b->words[j]->index=counter;
-          
+
           counter++;
         }
       }
@@ -263,6 +264,7 @@ Word** shrinkTable(Vocabulary* table, double margin, int* size){
   }
   return bow;
 }
+
 
 void deleteVocabulary(Vocabulary* table){
     /*

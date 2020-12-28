@@ -9,6 +9,7 @@ typedef struct WordType{
   char* str;
   int counter; //number of files that the word appears
   double tf_sum; //sum of all the tfs from all different files. used to calculate
+  double idf;
   double tfidf_score;//the score that will be used to shrink the table. its the average tf-idf for each word
   int index;
 }Word;

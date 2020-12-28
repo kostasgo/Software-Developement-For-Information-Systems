@@ -56,8 +56,6 @@ void test_Specs(void) {
 
 
 	deleteSpecs(specs);
-
-
 }
 
 void test_Clique(void) {
@@ -94,8 +92,6 @@ void test_Clique(void) {
 
 
 	deleteClique(clique1);
-
-
 }
 
 void test_Bucket(void) {
@@ -144,7 +140,6 @@ void test_Bucket(void) {
 }
 
 void test_Hashtable(void) {
-
 
   Value* value1 = NULL;
   insertValue(&value1, "val");
@@ -210,8 +205,6 @@ void test_Hashtable(void) {
 	deleteSpecs(specs2);
 	deleteSpecs(specs3);
 	deleteHashtable(table);
-
-
 
 }
 

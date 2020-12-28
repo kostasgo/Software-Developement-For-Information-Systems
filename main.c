@@ -101,7 +101,7 @@ int main(int argc, char* argv[]){
 
   printf("\nCreating Bag Of Words...\n");
   int totalSpecs=fillVocabulary(&vocabulary, specsList);
-  
+
   updateScores(vocabulary, totalSpecs);
   //printVocabulary(vocabulary);
   int bowSize=-1;
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]){
   //printf("%d\n",size);
 
   for(int i=0; i<bowSize;i++){
-    printf("%d %s\n",i, bow[i]->str);
+    printf("%d %s\t%lf\n",i, bow[i]->str, bow[i]->tfidf_score);
   }
   FILE *fp;
   fp = fopen(inputFile, "r");
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]){
   printf("\nGoing through %s...\n",inputFile);
   while(getline(&line, &len, fp) != -1){
     //printf("%s\n",line);
-    parseCsv(line, cliques);
+    parseCsv(line, cliques, vocabulary, bow, bowSize);
     c++;
   }
 
@@ -135,8 +135,9 @@ int main(int argc, char* argv[]){
   free(inputFile);
   outputToFile(cliques);
   deleteVocabulary(vocabulary);
-  deleteList(specsList);
+
   deleteHashtable(cliques);
+  deleteList(specsList);
 
 
   fclose(fp);

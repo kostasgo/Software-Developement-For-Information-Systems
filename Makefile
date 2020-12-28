@@ -3,8 +3,8 @@ EXEC = disambugator
 TEST = test
 SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c negative-cliques.c bow.c words.c
 HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h bow.h words.h
-OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o create-output.o bucket.o linkedlist.o negative-cliques.o bow.o words.o
-OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o negative-cliques.o create-output.o
+OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o bow.o create-output.o bucket.o linkedlist.o negative-cliques.o words.o
+OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o negative-cliques.o create-output.o bow.o words.o
 FLAGS = -g3 -c
 
 
@@ -14,6 +14,9 @@ all : $(OBJS2) $(OBJS)
 
 main.o:
 	$(CC) $(FLAGS) main.c
+
+create-output.o:
+	$(CC) $(FLAGS) create-output.c
 
 tests.o:
 	$(CC) $(FLAGS) tests.c
@@ -38,9 +41,6 @@ bucket.o:
 
 hashtable.o:
 	$(CC) $(FLAGS) hashtable.c
-
-create-output.o:
-	$(CC) $(FLAGS) create-output.c
 
 keyvalue.o:
 	$(CC) $(FLAGS) keyvalue.c

@@ -101,6 +101,7 @@ void insertCorrect(Specs ** specs, char* str){
   n->word = strdup(str);
   n->counter = 1;
   n->next = NULL;
+  n->tf = 0;
   (*specs)->total++;
 
   if((*specs)->words==NULL) {

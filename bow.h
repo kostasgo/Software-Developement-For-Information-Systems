@@ -1,5 +1,5 @@
-#ifndef vocabulary_h
-#define vocabulary_h
+#ifndef bow_h
+#define bow_h
 
 #include "words.h"
 #include "linkedlist.h"

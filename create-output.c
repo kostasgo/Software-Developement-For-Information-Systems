@@ -4,19 +4,26 @@
 #include "hashtable.h"
 #include "clique.h"
 #include "negative-cliques.h"
+#include "bow.h"
+#include "words.h"
 
 void mergeCliques(Hashtable* table, char* id1, char* id2){
+  /*
+  Takes two files that should be in the same clique and updates
+  their clique, as well as every cliquemember's clique pointer,
+  so that they all point to the same clique.
+  */
 
   BucketData* data1=searchHashtable(table, id1);
 	BucketData* data2=searchHashtable(table, id2);
 
 
   if(data1->clique==NULL){
-	//	printf("%s not in hashtable\n",id1);
+		printf("%s not in hashtable\n",id1);
 		return;
 	}
 	if(data2->clique==NULL){
-		//printf("%s not in hashtable\n",id2);
+		printf("%s not in hashtable\n",id2);
 		return;
 	}
   BucketData *new, *old;
@@ -57,6 +64,10 @@ void mergeCliques(Hashtable* table, char* id1, char* id2){
 }
 
 void updateNegatives(Hashtable* table, char* id1, char* id2){
+  /*
+  Takes two files that are negative to each other and updates the Cliques
+  they are in, so that they are marked as negative to each other.
+  */
   BucketData* data1=searchHashtable(table, id1);
 	BucketData* data2=searchHashtable(table, id2);
 
@@ -72,10 +83,49 @@ void updateNegatives(Hashtable* table, char* id1, char* id2){
   insertNegatives(&(data2->clique->negatives), data1->clique);
 }
 
-void parseCsv(char* line, Hashtable* table){
+double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bowSize){
+
+  //create an array of doubles and fill it with 0
+  double* array=(double*)malloc(sizeof(double)*bowSize);
+  for(int i=0; i<bowSize; i++){
+    array[i]=0;
+  }
+  //search the hashtable for the specific file
+  BucketData* data=searchHashtable(table, id);
+
+	CliqueNode* temp=data->clique->list;
+  Specs* specs;
+
+  while(temp!=NULL){
+    if(!strcmp(temp->specs->id,id)){
+      specs=temp->specs;
+      break;
+    }
+    temp=temp->next;
+  }
+
+  //go through the words in the file and see if they are in the bow.
+  //if they are update the tf-idf in the array
+  CorrectNode* current=specs->words;
+  while(current!=NULL){
+    Word* word=searchVocabulary(vocabulary, current->word);
+    //word = searchVocabulary(vocabulary, current->word);
+    if(word->index!=-1){
+      array[word->index]=word->idf*current->tf;
+
+    }
+    current=current->next;
+  }
+
+  return array;
+}
+
+void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, Word** bow, int bowSize){
 	/*
-	This function reads a .csv line, finds the two keys in the hashtable,
-	and merges their cliques if they are in different cliques.
+	This function reads a .csv line. Finds the two keys in the hashtable,
+	and merges their cliques if they are in different cliques, otherwise it inserts
+  both cliques to each other's negatives lists. Afterwards it creates an
+  array of tf-idf for each spec, that will be used in the logistic regressor.
 	*/
 	//printf("%s\n",line);
 	char* spec_1, *spec_2, *temp;
@@ -93,18 +143,21 @@ void parseCsv(char* line, Hashtable* table){
   label = strtol(token, &temp, 10);
 
 	if(label==0){
-		(table, spec_1, spec_2);
-		free(spec_1);
-		free(spec_2);
-		return;
+		updateNegatives(table, spec_1, spec_2);
 	}
+  else{
+    mergeCliques(table, spec_1, spec_2);
+  }
 
+  double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
+  double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
+
+  free(spec_1);
+  free(spec_2);
 
 
 	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
-	mergeCliques(table, spec_1, spec_2);
-	free(spec_1);
-	free(spec_2);
+
 
 }
 

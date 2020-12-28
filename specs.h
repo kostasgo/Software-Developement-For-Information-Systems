@@ -18,6 +18,7 @@ typedef struct CorrectNodeType{
   */
   char* word;
   int counter;
+  double tf;
   struct CorrectNodeType* next;
 } CorrectNode;
 

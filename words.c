@@ -11,6 +11,7 @@ Word* createWord(char * str){
   word->index=-1;
   word->tf_sum=0;
   word->tfidf_score=0;
+  word->idf=0;
   return word;
 }
 
@@ -49,6 +50,7 @@ void updateTfIdfScore(VocBucket *b,int totalFiles){
     double temp =(double)totalFiles/(double)b->words[i]->counter;
     double idf= log(temp);
     //printf("%lf %lf\n",temp,idf);
+    b->words[i]->idf=idf;
     b->words[i]->tfidf_score=avg_tf*idf;
   }
   //if it reaches this point, then we must look in the next bucket
