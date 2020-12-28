@@ -161,6 +161,8 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, Word** bow, 
 
 }
 
+
+
 void outputToFile(Hashtable* table){
 	/*
 	Does the final output. Runs through the whole hashtable and
@@ -174,7 +176,7 @@ void outputToFile(Hashtable* table){
     exit(1);
   }
 
-  fprintf(fp,"left_spec_id, right_spec_id\n");
+  //fprintf(fp,"left_spec_id, right_spec_id, label\n");
 	for(int i=0; i<table->max;i++){
 		Bucket* temp= table->array[i];
 		while(temp!=NULL){
@@ -196,13 +198,14 @@ void outputToFile(Hashtable* table){
 						temp2=temp2->next;
 						while(temp2!=NULL){
 							//printf("%s, %s\n",temp1->specs->id, temp2->specs->id);
-							fprintf(fp,"%s, %s\n",temp1->specs->id, temp2->specs->id);
+							fprintf(fp,"%s, %s, 1\n",temp1->specs->id, temp2->specs->id);
 							temp2=temp2->next;
 						}
 
 						temp1=temp1->next;
 						temp2=temp1;
 					}
+
 				}
 			}
 
