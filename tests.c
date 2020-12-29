@@ -1,13 +1,15 @@
 #include "acutest.h"
 #include <string.h>
-
+#include "bucket.h"
 #include "keyvalue.h"
 #include "hashtable.h"
 #include "clique.h"
 #include "specs.h"
 #include "parser.h"
+#include "lowlevel-io.h"
 #include "negative-cliques.h"
 #include "create-output.h"
+#include "bow.h"
 
 
 void test_KV(void) {
@@ -31,6 +33,55 @@ void test_KV(void) {
 
 
 }
+
+
+void test_LLIO(void) {
+	
+	int numOfDirs = countDirectories("Datasets/2013_camera_specs");
+	TEST_ASSERT(numOfDirs == 24);   // Test if the subdirectories are really 24
+	
+	char* path = createPath("Datasets/2013_camera_specs", "buy.net");
+	TEST_ASSERT(!strcmp(path, "Datasets/2013_camera_specs/buy.net")); // Test if the sring of the path was created as expected
+	
+	deletePath(path);
+	
+	
+	char** directories = NULL;
+	directories = createDirTable(numOfDirs, "Datasets/2013_camera_specs");
+	TEST_ASSERT(directories != NULL);  // Test if the array of directories is not NULL
+		
+	deleteDirTable(directories, numOfDirs);
+	
+}
+
+
+void test_Parser(void){
+	
+	Specs* test = parser("buy.net", "4233.json");
+	
+	SpecsNode* node;
+	node = test->list;
+	KV_Pair * pair;
+	pair = node->data;
+	
+	
+	// Test if the first pair of values of the spec is as expected 
+	TEST_ASSERT(!strcmp(pair->key, "<page title>") && !strcmp(pair->value->str, "Olympus OM-D E-M10 Black Digital Camera (16.1 MP, SD/SDHC/SDXC Card Slot) Price Comparison at Buy.net"));
+
+	
+	while(node->next != NULL)
+		node = node->next;
+	
+	pair = node->data;
+	
+	// Test if the last pair of values of the spec is as expected	
+	TEST_ASSERT(!strcmp(pair->key, "wifi") && !strcmp(pair->value->str, "Yes"));
+	
+	deleteSpecsList(test->list);
+	deleteSpecs(test);
+	
+}
+
 
 void test_Specs(void) {
 
@@ -214,5 +265,7 @@ TEST_LIST = {
 	{ "clique", test_Clique },
 	{ "bucket", test_Bucket },
 	{ "hashtable", test_Hashtable },
+	{ "lowlevel-io", test_LLIO },
+	{ "parser", test_Parser },
 	{ NULL, NULL }
 };
