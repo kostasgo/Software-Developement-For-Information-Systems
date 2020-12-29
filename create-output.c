@@ -6,6 +6,7 @@
 #include "negative-cliques.h"
 #include "bow.h"
 #include "words.h"
+#include "logistic_regression.h"
 
 void mergeCliques(Hashtable* table, char* id1, char* id2){
   /*
@@ -120,7 +121,7 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
   return array;
 }
 
-void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, Word** bow, int bowSize){
+void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize, Classifier* logReg, int counter, FILE* fp, int lines){
 	/*
 	This function reads a .csv line. Finds the two keys in the hashtable,
 	and merges their cliques if they are in different cliques, otherwise it inserts
@@ -149,8 +150,42 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, Word** bow, 
     mergeCliques(table, spec_1, spec_2);
   }
 
+
+
   double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
   double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
+  double* x = (double*)malloc(sizeof(double)*bowSize*2+1);
+  for(int i=0; i<bowSize; i++){
+    x[i]=array1[i];
+  }
+  for(int i=bowSize; i<2*bowSize; i++){
+    x[i]=array2[i];
+  }
+  x[2*bowSize]=1;
+  if(counter<lines){
+    logisticRegression(logReg, x, label, 100);
+    if(label==1){
+      for(int i=0; i<10; i++){
+        logisticRegression(logReg, x, label, 100);
+      }
+
+    }
+  }
+  else{
+    double h = hypothesis(logReg->w,x,logReg->size);
+    int prediction;
+    if(h>=0.5){
+      prediction=1;
+    }
+    else{
+      prediction=0;
+    }
+    fprintf(fp,"%s,%s,%d\n",spec_1,spec_2,prediction);
+  }
+
+  free(array1);
+  free(array2);
+  free(x);
 
   free(spec_1);
   free(spec_2);

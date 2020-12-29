@@ -60,7 +60,7 @@ parser.o:
 .PHONY : clean info
 
 clean :
-	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) output.csv
+	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) output.csv predictions.csv
 
 run: $(EXEC)
 	valgrind ./$(EXEC)

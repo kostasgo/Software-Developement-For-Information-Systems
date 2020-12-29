@@ -20,9 +20,13 @@ Run: ./disambugator
 #include "linkedlist.h"
 #include "bow.h"
 #include "words.h"
+#include "logistic_regression.h"
 
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
+
+#define LARGELINES 297653
+#define MEDIUMLINES 46667
 
 #define DATAPATH "Datasets/2013_camera_specs"
 
@@ -33,9 +37,14 @@ Run: ./disambugator
 
 #define MARGIN 0.0029
 
+#define LEARNING_RATE 0.001
+
+#define LEARN_PERCENT 80
+
 int main(int argc, char* argv[]){
 
   char* inputFile;
+  int noOfLines;
 
 
   if(argc!=2 && argc!=1){
@@ -45,12 +54,14 @@ int main(int argc, char* argv[]){
   if(argc == 1){
 
     inputFile=strdup(MEDIUM);
+    noOfLines=MEDIUMLINES;
     printf("Running with medium file! (Default)\n\n");
   }
   if(argc == 2){
     if(!strcmp(argv[1],"-l")){
 
       inputFile=strdup(LARGE);
+      noOfLines=LARGELINES;
       printf("Running with large file!\n\n");
     }
     else{
@@ -60,11 +71,13 @@ int main(int argc, char* argv[]){
 
   }
 
-
+  int lineToStop=noOfLines*LEARN_PERCENT/100;
+  printf("%d\n",lineToStop);
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
   Vocabulary* vocabulary = createVocabulary(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
+
 
   //Access Files
   int numOfFiles, numOfDirectories;
@@ -106,6 +119,7 @@ int main(int argc, char* argv[]){
   //printVocabulary(vocabulary);
   int bowSize=-1;
   Word** bow=shrinkTable(vocabulary,MARGIN, &bowSize);
+  Classifier* logReg= createClassifier(bowSize*2+1,LEARNING_RATE);
   //printf("%d\n",size);
 
   for(int i=0; i<bowSize;i++){
@@ -121,15 +135,31 @@ int main(int argc, char* argv[]){
   size_t len=0;
   int c=0;
   printf("\nGoing through %s...\n",inputFile);
+
+
+	FILE *fp2;
+  fp2= fopen("predictions.csv", "w");
+  if(fp2 == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
+  getline(&line, &len, fp); // read 1st line
+  printf("Training the model...\n");
+  int linesTested=0;
   while(getline(&line, &len, fp) != -1){
-    //printf("%s\n",line);
-    parseCsv(line, cliques, vocabulary, bow, bowSize);
+    //printf("%d\n",c);
+    if(c==lineToStop){
+      printf("Doing predictions...\n");
+      linesTested=0;
+    }
+    parseCsv(line, cliques, vocabulary, bowSize, logReg, c, fp2, lineToStop);
     c++;
+    linesTested++;
   }
 
   //printHashtable(cliques);
   //printf("Num of lines: %d\n",c);
-  printf("\nFinished!\n");
+  printf("\nFinished! Lines tested: %d\n",linesTested);
   free(line);
 
   free(inputFile);
@@ -141,6 +171,7 @@ int main(int argc, char* argv[]){
 
 
   fclose(fp);
+  fclose(fp2);
 
   return 0;
 
