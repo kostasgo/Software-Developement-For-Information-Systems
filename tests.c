@@ -259,6 +259,98 @@ void test_Hashtable(void) {
 
 }
 
+
+void test_Vocabulary(void){
+	
+	char* str = strdup("HeLl0 WoRld!");
+	toLower(str);
+	TEST_ASSERT(!strcmp(str, "hell0 world!"));
+	free(str);
+	
+	
+	int i;
+	char** stopWords = createStopWordsTable();
+	
+	TEST_ASSERT(isStopword("you", stopWords) && isStopword("also", stopWords) && isStopword("among", stopWords) || !isStopword("samsung", stopWords));		
+	
+	
+	Word* word = createWord(str);
+	
+	if(word->counter == 0 && word->index == -1 && word->tf_sum == 0 && word->tfidf_score == 0 && word->idf == 0 && !strcmp(str, word->str))
+	
+	deleteWord(word);
+	
+	i = 6;
+	
+	  
+    VocBucket* vocBuc = createVocBucket(i);
+	TEST_ASSERT(vocBuc->max == i && vocBuc->next == NULL && !strcmp(vocBuc->words[0]->str, "-") && !strcmp(vocBuc->words[i-1]->str, "-"));
+	
+	vocBuc->words[0]->str = strdup("firstword");
+	
+	word = createWord(searchVocBucket(vocBuc, "-")->str);
+	TEST_ASSERT(!strcmp(word->str, "-"));
+	deleteWord(word);
+	
+	word = createWord(searchVocBucket(vocBuc, "firstword")->str);
+	TEST_ASSERT(!strcmp(word->str, "firstword"));
+	deleteWord(word);
+	
+	word = createWord(searchVocBucket(vocBuc, "secondword")->str);
+	TEST_ASSERT(!strcmp(word->str, "-"));
+	deleteWord(word);
+	
+	deleteVocBucket(vocBuc);
+	
+	
+	
+	Vocabulary* voc = NULL;
+	voc = createVocabulary(6, 4);
+	TEST_ASSERT(voc != NULL);
+	
+	
+	insertVocabulary(&voc, "testWord", 1.0);
+	insertVocabulary(&voc, "testWord2", 1.0);
+	TEST_ASSERT(!strcmp((searchVocabulary(voc, "testWord")->str), "testWord"));
+	TEST_ASSERT(!strcmp((searchVocabulary(voc, "testWord2")->str), "testWord2"));
+	
+	deleteVocabulary(voc);
+	
+	voc = createVocabulary(100, 5);
+	
+	Specs* spec = parser("buy.net", "4233.json");
+	SpecsNode* specNode = spec->list;
+
+	filterSpec(spec, stopWords);
+	
+	ListNode* specsList = NULL;
+	
+	insertList(&specsList, spec);
+	
+	spec = parser("www.alibaba.com", "5445.json");
+	filterSpec(spec, stopWords);
+	insertList(&specsList, spec);
+	
+	spec = parser("buy.net", "4233.json");
+	filterSpec(spec, stopWords);
+	insertList(&specsList, spec);
+	
+	int totalSpecs = fillVocabulary(&voc, specsList);
+	updateScores(voc, totalSpecs);
+
+	deleteStopWordsTable(stopWords);
+	
+	int bowSize=-1;
+    Word** bow=  shrinkTable(voc, 0.0029, &bowSize);
+  
+    for(i = 0; i < bowSize; i++){
+        TEST_ASSERT(!strcmp((searchVocabulary(voc, bow[i]->str)->str), bow[i]->str));
+    }		
+	
+	deleteVocabulary(voc);
+	
+}
+
 TEST_LIST = {
 	{ "keyvalue", test_KV },
 	{ "specs", test_Specs },
@@ -267,5 +359,6 @@ TEST_LIST = {
 	{ "hashtable", test_Hashtable },
 	{ "lowlevel-io", test_LLIO },
 	{ "parser", test_Parser },
+	{ "vocabulary", test_Vocabulary },
 	{ NULL, NULL }
 };
