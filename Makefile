@@ -1,5 +1,5 @@
 CC = gcc
-EXEC = disambugator
+EXEC = modelTraining
 TEST = test
 SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c negative-cliques.c bow.c words.c logistic_regression.c
 HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h bow.h words.h logistic_regression.h
@@ -61,7 +61,7 @@ parser.o:
 .PHONY : clean info
 
 clean :
-	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) $(CSV)
+	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) $(CSV) statistics
 
 run: $(EXEC)
 	valgrind ./$(EXEC)

@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
 
 
   if(argc!=2 && argc!=1){
-    printf("Usage: ./disambugator (-l)\n");
+    printf("Usage: ./modelTraining (-l)\n");
     return -1;
   }
   if(argc == 1){
@@ -103,7 +103,9 @@ int main(int argc, char* argv[]){
     perror("Unable to open file!");
     exit(1);
   }
+
   shuffleArray(csv,noOfLines);
+
   for(int i=lineToStop;i<noOfLines;i++){
     //printf("%s\n",csv[i]);
     fprintf(fp2,"%s\n",csv[i]);
@@ -188,10 +190,34 @@ int main(int argc, char* argv[]){
     parseCsv(csv[i], cliques, vocabulary, bowSize, logReg, i, fp3, lineToStop);
     linesTested++;
   }
-
+  FILE *fp4;
+  fp4= fopen("statistics", "w");
+  if(fp3 == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
   printf("\nFinished! Run ./validation.sh to see how you did!\n");
+  fprintf(fp4, "STATISTICS\n\n\n\nFILE USED:");
+  if(!strcmp(inputFile,LARGE)){
+    fprintf(fp4, "LARGE\n");
+  }
+  else{
+    fprintf(fp4, "MEDIUM\n");
+  }
 
+  fprintf(fp4, "\nPERCENTAGE OF FILE USED FOR TRAINING: %d\n\nLEARNING RATE: %lf\n\nMARGIN OF AVERAGE TF-IDFs ALLOWED: %lf\n\n",LEARN_PERCENT,LEARNING_RATE,MARGIN);
 
+  fprintf(fp4, "FINAL VOCABULARY: \n--------------------------------------------\n");
+  for(int i=0;i<bowSize;i++){
+    fprintf(fp4, "%s\n", bow[i]->str);
+
+  }
+  free(bow);
+  fprintf(fp4, "--------------------------------------------\nWEIGHTS: \n--------------------------------------------\n");
+  for(int i=0;i<=2*bowSize;i++){
+    fprintf(fp4, "%lf\n", logReg->w[i]);
+
+  }
   free(inputFile);
   outputToFile(cliques);
   deleteVocabulary(vocabulary);
@@ -208,6 +234,7 @@ int main(int argc, char* argv[]){
   fclose(fp);
   fclose(fp2);
   fclose(fp3);
+  fclose(fp4);
 
   return 0;
 
