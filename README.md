@@ -174,6 +174,19 @@
   *  void gradientDescent(double*, double*, int, int, double): Ανανεώνει τα βάρει χρησιμοποιώντας τον αλγόριθμο ελάττωσης της παραγώγου (gradient descent) για την ελαχιστοποίηση του σφάλματος.
   *  void logisticRegression(Classifier*, double*, int, int): Επαναλαμβάνει τον αλγόριθμο του gradient descent για ένα δοσμένο αριθμό επαναλήψεων.
   
+  #### Νέες/αλλαγμένες συναρτήσεις στο create_output.h
+
+  *  void swapStrings(char**, char**): Αλλάζει τους pointers από 2 strings. (τάκης 101)
+  *  void shuffleArray(void* , size_t): Ανακατεύει ένα array από strings τυχαία.
+  *  void mergeCliques(Hashtable*, char*, char*): Ψάχνει δυο strings στο hashtable και τα κάνει update να δείχνουν στην ίδια κλίκα, η οποία περιέχει τα στοιχεία και των δύο κλικών.
+  *  void updateNegatives(Hashtable*, char*, char*): Κάνει update 2 κλίκες ώστε η μία να είναι στη λίστα των αρνητικών της άλλης.
+  *  double* getTfIdfArray(Hashtable*, char*, Vocabulary*, int): Δημιουργεί πίνακα tf-idf για ένα αρχείο πάνω στο λεξιλόγιο Bag Of Words που έχουμε.
+  *  void parseCsv(char*, Hashtable*, Vocabulary*, int, Classifier*,int,FILE*,int): Στη νέα μορφή του parseCsv διορθώνουμε τις κλίκες/αρνητικές συσχετίσεις και επίσης για κάθε γραμμή, μέχρι ένα σημείο κάνουμε train το μοντέλο. Από εκεί και πέρα το χρησιμοποιούμε για να κάνουμε predict τιμές
+  
+  ### Validation script
+  
+  Αφού τελειώσει η εκτέλεση του προγράμματος μπορούμε να χρησιμοποιήσουμε ένα validation script για να μάθουμε πόσο αποτελεσματικό ήταν το training. Το script αυτό απλά συγκρίνει το αρχείο με τις προβλέψεις predictions.csv και το αρχείο testing.csv που έχει το μέρος του αρχείου csv που κρατήθηκε για το testing.
+
   ## Unit testing
   
   Για την εξέταση της λειτουργίας των δομών χρησιμοποιήθηκε η βιβλιοθήκη acutest.h. Δεν ισχυριζόμαστε καμία δικαιοδοσία πάνω της και ευχαριστούμε για το δωρεάν υλικό και γνώση.
