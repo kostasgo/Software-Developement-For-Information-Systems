@@ -173,3 +173,8 @@
   *  double hypothesis(double*, double*, int): Η συνάρτηση της λογιστικής παλινδρόμησης.
   *  void gradientDescent(double*, double*, int, int, double): Ανανεώνει τα βάρει χρησιμοποιώντας τον αλγόριθμο ελάττωσης της παραγώγου (gradient descent) για την ελαχιστοποίηση του σφάλματος.
   *  void logisticRegression(Classifier*, double*, int, int): Επαναλαμβάνει τον αλγόριθμο του gradient descent για ένα δοσμένο αριθμό επαναλήψεων.
+  
+  ##Unit testing
+  
+  Για την εξέταση της λειτουργίας των δομών χρησιμοποιήθηκε η βιβλιοθήκη acutest.h. Δεν ισχυριζόμαστε καμία δικαιοδοσία πάνω της και ευχαριστούμε για το δωρεάν υλικό και γνώση.
+  Περισσότερες πληροφορίες για την acutest εδώ: https://github.com/mity/acutest
