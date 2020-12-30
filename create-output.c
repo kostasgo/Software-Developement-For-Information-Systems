@@ -18,7 +18,9 @@ void swapStrings(char** str1, char** str2){
 }
 
 void shuffleArray(char** arr, size_t n){
-
+  /*
+  Shuffles an array of strings
+  */
   if(n>1){
     size_t i;
     for(i=0;i<n-1;++i){
@@ -155,6 +157,7 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
   both cliques to each other's negatives lists. Afterwards it creates an
   array of tf-idf for each spec, that will be used in the logistic regressor.
 	*/
+
 	//printf("%s\n",line);
 	char* spec_1, *spec_2, *temp;
 	int label, pos_1, pos_2;
@@ -178,35 +181,49 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
   }
 
 
-
+  //create x
   double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
   double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
-  double* x = (double*)malloc(sizeof(double)*bowSize*2+1);
+  double* x = (double*)malloc(sizeof(double)*(bowSize*2+1));
   for(int i=0; i<bowSize; i++){
     x[i]=array1[i];
+    x[bowSize + i]=array2[i];
   }
-  for(int i=bowSize; i<2*bowSize; i++){
+ /*for(int i=bowSize; i<2*bowSize; i++){
     x[i]=array2[i];
-  }
+  }*/
   x[2*bowSize]=1;
+
   if(counter<lines){
+    //train the model
     logisticRegression(logReg, x, label, NUM_ITERS);
-    logisticRegression(logReg, x, label, NUM_ITERS);
-    if(label==1){
-      for(int i=0; i<8; i++){
+    //logisticRegression(logReg, x, label, NUM_ITERS);
+    if(label==1){ //Train the model extra for 1s to compensate the bias
+      for(int i=0; i<4; i++){
         logisticRegression(logReg, x, label, NUM_ITERS);
       }
 
     }
   }
   else{
+    //predict an output
+    //BucketData* data1=searchHashtable(table, spec_1);
+  	//BucketData* data2=searchHashtable(table, spec_2);
     double h = hypothesis(logReg->w,x,logReg->size);
     int prediction;
     if(h>=0.5){
       prediction=1;
+      /*
+      if(areNegatives(data1->clique,data2->clique)){
+        prediction=0;
+      }*/
     }
     else{
       prediction=0;
+      /*
+      if(compareCliques(data1->clique,data2->clique)){
+        prediction=1;
+      }*/
     }
     fprintf(fp,"%s,%s,%d\n",spec_1,spec_2,prediction);
   }

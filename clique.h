@@ -36,6 +36,7 @@ void deleteClique(Clique *);
 void printClique(Clique*);
 int isInClique(char*, Clique*);
 int compareCliques(Clique*, Clique*);
+int areNegatives(Clique*, Clique*);
 
 
 #endif

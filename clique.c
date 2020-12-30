@@ -153,3 +153,18 @@ int compareCliques(Clique* cl1, Clique* cl2){
   }
   return 0;
 }
+
+int areNegatives(Clique* cl1, Clique* cl2){
+  /*
+  Looks if the two cliques are negative to each other
+  */
+  NegListNode* temp=cl1->negatives;
+
+  while(temp!=NULL){
+    if(compareCliques(cl2,temp->clique)){
+      return 1;
+    }
+    temp=temp->next;
+  }
+  return 0;
+}

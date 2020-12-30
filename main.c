@@ -25,8 +25,8 @@ Run: ./disambugator
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
 
-#define LARGELINES 297652
-#define MEDIUMLINES 46666
+#define LARGELINES 297651
+#define MEDIUMLINES 46665
 
 #define DATAPATH "Datasets/2013_camera_specs"
 
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]){
   }
 
   int lineToStop=noOfLines*LEARN_PERCENT/100;
-  printf("%d\n",lineToStop);
+
 
   char **csv = (char**)malloc(sizeof(char*)*noOfLines);
 
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]){
   }
   char *line = NULL;
   size_t len=0;
-  //getline(&line, &len, fp);
+  getline(&line, &len, fp);
   int c=0;
   while(getline(&line, &len, fp) != -1){
     //printf("%d\n",c);
@@ -95,6 +95,8 @@ int main(int argc, char* argv[]){
     c++;
 
   }
+  free(line);
+
   FILE *fp2;
   fp2 = fopen("testing.csv", "w");
   if(fp2 == NULL){
@@ -121,7 +123,7 @@ int main(int argc, char* argv[]){
 
   numOfDirectories=countDirectories(DATAPATH);
   char** directories = createDirTable(numOfDirectories, DATAPATH);
-  printf("processing directories...\n\n");
+  printf("Processing directories...\n\n");
 
   for(int i=0; i<numOfDirectories; i++){
     //For each directory create files table
@@ -148,6 +150,7 @@ int main(int argc, char* argv[]){
   deleteStopWordsTable(stopwords);
   deleteDirTable(directories, numOfDirectories);
 
+  // Here we create the vocabulary
   printf("\nCreating Bag Of Words...\n");
   int totalSpecs=fillVocabulary(&vocabulary, specsList);
 
@@ -159,7 +162,7 @@ int main(int argc, char* argv[]){
   //printf("%d\n",size);
 
   for(int i=0; i<bowSize;i++){
-    printf("%d %s\t%lf\n",i, bow[i]->str, bow[i]->tfidf_score);
+    printf("%d %s\n",i, bow[i]->str);
   }
 
 
@@ -173,22 +176,21 @@ int main(int argc, char* argv[]){
     exit(1);
   }
 
-  printf("Training the model...\n");
+  printf("\nTraining the model using %d%% of the given file...\n",LEARN_PERCENT);
   int linesTested=0;
+  //parse the csv to train and test the model
 
   for(int i=0; i<noOfLines; i++){
     if(i==lineToStop){
-      printf("Doing predictions...\n");
+      printf("\nDoing predictions...\n");
       linesTested=0;
     }
     parseCsv(csv[i], cliques, vocabulary, bowSize, logReg, i, fp3, lineToStop);
     linesTested++;
   }
 
-  //printHashtable(cliques);
-  //printf("Num of lines: %d\n",c);
-  printf("\nFinished! Lines tested: %d\n",linesTested);
-  free(line);
+  printf("\nFinished! Run ./validation.sh to see how you did!\n");
+
 
   free(inputFile);
   outputToFile(cliques);
@@ -196,6 +198,11 @@ int main(int argc, char* argv[]){
 
   deleteHashtable(cliques);
   deleteList(specsList);
+  deleteClassifier(logReg);
+  for(int i=0; i<noOfLines; i++){
+    free(csv[i]);
+  }
+  free(csv);
 
 
   fclose(fp);
