@@ -1,26 +1,20 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]
-  then echo "Usage $0 [inputFile] [numberOfLines]" && exit
+if [ $# -ne 0 ]
+  then echo "Usage $0 " && exit
 fi
 
-if [ ! -e $1 ]
-  then echo "File '$1' does not exist, enter correct inputFile"
-  exit
-fi
+diff testing.csv predictions.csv | grep "^>" | wc -l > b
 
-tail -n $2 $1 > a
-diff a predictions.csv | grep "^>" | wc -l > b
-
-
+noOfLines=( $(wc -l predictions.csv))
 mistakes=( $(cat b) )
 
-correct=0
-let "correct= $2 - $mistakes"
 
-percent=0
-let "percent = $correct * 100 / $2"
+let "correct= $noOfLines - $mistakes"
+
+
+let "percent = $correct * 100 / $noOfLines"
 echo "ACCURACY $percent%"
-echo "$mistakes LINES WRONG OUT OF $2"
+echo "$mistakes LINES WRONG OUT OF $noOfLines"
 
-rm a b
+rm b

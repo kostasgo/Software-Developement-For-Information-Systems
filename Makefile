@@ -5,6 +5,7 @@ SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c cre
 HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h bow.h words.h logistic_regression.h
 OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o bow.o create-output.o bucket.o linkedlist.o negative-cliques.o words.o logistic_regression.o
 OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o negative-cliques.o create-output.o bow.o words.o logistic_regression.o lowlevel-io.o parser.o
+CSV = output.csv predictions.csv testing.csv
 FLAGS = -g3 -c
 
 
@@ -60,7 +61,7 @@ parser.o:
 .PHONY : clean info
 
 clean :
-	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) output.csv predictions.csv
+	rm -f $(OBJS) $(OBJS2) $(EXEC) $(TEST) $(CSV)
 
 run: $(EXEC)
 	valgrind ./$(EXEC)

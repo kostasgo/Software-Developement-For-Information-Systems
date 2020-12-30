@@ -1,12 +1,34 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "hashtable.h"
 #include "clique.h"
 #include "negative-cliques.h"
 #include "bow.h"
 #include "words.h"
 #include "logistic_regression.h"
+
+#define NUM_ITERS 10
+
+void swapStrings(char** str1, char** str2){
+  char* temp =*str1;
+  *str1 = *str2;
+  *str2 = temp;
+}
+
+void shuffleArray(char** arr, size_t n){
+
+  if(n>1){
+    size_t i;
+    for(i=0;i<n-1;++i){
+      size_t rnd = (size_t)rand();
+      size_t j =( i + rnd) % (n - i);
+
+      swapStrings(&arr[i],&arr[j]);
+    }
+  }
+}
 
 void mergeCliques(Hashtable* table, char* id1, char* id2){
   /*
@@ -91,8 +113,13 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
   for(int i=0; i<bowSize; i++){
     array[i]=0;
   }
+
   //search the hashtable for the specific file
   BucketData* data=searchHashtable(table, id);
+  if(data->clique==NULL){
+		printf("%s not in hashtable\n",id);
+		return array;
+	}
 
 	CliqueNode* temp=data->clique->list;
   Specs* specs;
@@ -163,10 +190,11 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
   }
   x[2*bowSize]=1;
   if(counter<lines){
-    logisticRegression(logReg, x, label, 100);
+    logisticRegression(logReg, x, label, NUM_ITERS);
+    logisticRegression(logReg, x, label, NUM_ITERS);
     if(label==1){
-      for(int i=0; i<10; i++){
-        logisticRegression(logReg, x, label, 100);
+      for(int i=0; i<8; i++){
+        logisticRegression(logReg, x, label, NUM_ITERS);
       }
 
     }

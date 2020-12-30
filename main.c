@@ -25,8 +25,8 @@ Run: ./disambugator
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
 
-#define LARGELINES 297653
-#define MEDIUMLINES 46667
+#define LARGELINES 297652
+#define MEDIUMLINES 46666
 
 #define DATAPATH "Datasets/2013_camera_specs"
 
@@ -73,6 +73,42 @@ int main(int argc, char* argv[]){
 
   int lineToStop=noOfLines*LEARN_PERCENT/100;
   printf("%d\n",lineToStop);
+
+  char **csv = (char**)malloc(sizeof(char*)*noOfLines);
+
+
+
+  FILE *fp;
+  fp = fopen(inputFile, "r");
+  if(fp == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
+  char *line = NULL;
+  size_t len=0;
+  //getline(&line, &len, fp);
+  int c=0;
+  while(getline(&line, &len, fp) != -1){
+    //printf("%d\n",c);
+    line[strlen(line)-1]='\0';
+    csv[c]=strdup(line);
+    c++;
+
+  }
+  FILE *fp2;
+  fp2 = fopen("testing.csv", "w");
+  if(fp2 == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
+  shuffleArray(csv,noOfLines);
+  for(int i=lineToStop;i<noOfLines;i++){
+    //printf("%s\n",csv[i]);
+    fprintf(fp2,"%s\n",csv[i]);
+  }
+
+
+
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
@@ -125,35 +161,27 @@ int main(int argc, char* argv[]){
   for(int i=0; i<bowSize;i++){
     printf("%d %s\t%lf\n",i, bow[i]->str, bow[i]->tfidf_score);
   }
-  FILE *fp;
-  fp = fopen(inputFile, "r");
-  if(fp == NULL){
-    perror("Unable to open file!");
-    exit(1);
-  }
-  char *line = NULL;
-  size_t len=0;
-  int c=0;
+
+
   printf("\nGoing through %s...\n",inputFile);
 
 
-	FILE *fp2;
-  fp2= fopen("predictions.csv", "w");
-  if(fp2 == NULL){
+	FILE *fp3;
+  fp3= fopen("predictions.csv", "w");
+  if(fp3 == NULL){
     perror("Unable to open file!");
     exit(1);
   }
-  getline(&line, &len, fp); // read 1st line
+
   printf("Training the model...\n");
   int linesTested=0;
-  while(getline(&line, &len, fp) != -1){
-    //printf("%d\n",c);
-    if(c==lineToStop){
+
+  for(int i=0; i<noOfLines; i++){
+    if(i==lineToStop){
       printf("Doing predictions...\n");
       linesTested=0;
     }
-    parseCsv(line, cliques, vocabulary, bowSize, logReg, c, fp2, lineToStop);
-    c++;
+    parseCsv(csv[i], cliques, vocabulary, bowSize, logReg, i, fp3, lineToStop);
     linesTested++;
   }
 
@@ -172,6 +200,7 @@ int main(int argc, char* argv[]){
 
   fclose(fp);
   fclose(fp2);
+  fclose(fp3);
 
   return 0;
 
