@@ -10,8 +10,8 @@ FLAGS = -g3 -c
 
 
 all : $(OBJS2) $(OBJS)
-	$(CC) -o $(TEST) $(OBJS2) -lm
-	$(CC) -o $(EXEC) $(OBJS) -lm
+	$(CC) -pthread -o $(TEST) $(OBJS2) -lm
+	$(CC) -pthread -o $(EXEC) $(OBJS) -lm
 
 main.o:
 	$(CC) $(FLAGS) main.c
