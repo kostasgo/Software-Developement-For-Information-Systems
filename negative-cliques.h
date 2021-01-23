@@ -12,6 +12,8 @@ typedef struct NegListNodeType{
   */
   struct CliqueType* clique;
   struct NegListNodeType* next;
+  int dirtyBit; //this byte is used when creating the final set
+  
 }NegListNode;
 
 void insertNegatives(NegListNode**, struct CliqueType*);

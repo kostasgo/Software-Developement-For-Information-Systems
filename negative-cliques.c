@@ -9,6 +9,7 @@ void insertNegatives(NegListNode** list, Clique* clique){
   NegListNode *n = (NegListNode *)malloc(sizeof(NegListNode));
   n->clique = clique;
   n->next = NULL;
+  n->dirtyBit = 0;
   if((*list)==NULL) {
     //printf("Inserting specs %d at first node\n",p->id);
     *list = n;
