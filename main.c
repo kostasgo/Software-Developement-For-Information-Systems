@@ -2,7 +2,7 @@
 This is a project created for the module "Software Developement for Information Systems"
 for the Univercity of Athens, Department of Informatics.
 
-Authors: Konstantinos Gkogkas, Nikolaos Sentis
+Authors: Konstantinos Gkogkas, Nikolaos Sentis, Konstantinos Maragkos
 
 Compile: make
 Run: ./modelTraining
@@ -46,6 +46,13 @@ Run: ./modelTraining
 
 int main(int argc, char* argv[]){
 
+/*
+-----STARTING SECTION---------------
+Start Program
+Initialize input variables and data structures
+
+*/
+
   char* inputFile;
   int noOfLines;
 
@@ -74,11 +81,7 @@ int main(int argc, char* argv[]){
 
   }
 
-/*
------JSON SECTION---------------
-Parse the json files into specs: then clean them up and create
-the vocabulary, as well as the shrunk array of words that we are going to use.
-*/
+
 
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
@@ -86,6 +89,11 @@ the vocabulary, as well as the shrunk array of words that we are going to use.
   Vocabulary* vocabulary = createVocabulary(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
 
 
+/*
+-----JSON SECTION---------------
+Parse the json files into specs. then clean them up and get each on a single clique. Create
+the vocabulary, as well as the shrunk array of words that we are going to use for training later.
+*/
 
   //Access Files
   int numOfFiles, numOfDirectories;
@@ -137,7 +145,7 @@ the vocabulary, as well as the shrunk array of words that we are going to use.
 
 /*
 -----CSV SECTION---------------
-Parse the csv to adjust the cliques and create the sets:
+Parse the csv to adjust the cliques and create the three sets:
 trainingSet, validationSet and testingSet.
 */
 
@@ -258,6 +266,7 @@ Train the model in a number of epochs
 using multiple threads
 */
 threadpool tp;
+printf("\nTraining the model...\n");
 
 /*
 -----VALIDATION SECTION---------------
@@ -278,6 +287,7 @@ produce.
 -----FINAL SECTION---------------
 Finish Program
 Print statistics
+Free memory
 */
 
   FILE *fp4;
@@ -315,12 +325,9 @@ Print statistics
 
   deleteHashtable(cliques);
   deleteList(specsList);
-  deleteClassifier(logReg);/*
+  deleteClassifier(logReg);
 
-  for(int i=0; i<noOfLines; i++){
-    free(csv[i]);
-  }
-  free(csv);*/
+
 
   fclose(fp4);
 
