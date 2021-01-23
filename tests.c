@@ -10,6 +10,34 @@
 #include "negative-cliques.h"
 #include "create-output.h"
 #include "bow.h"
+#include "thread_pool.h"
+
+// global vars for threads
+int task = 0;
+pthread_mutex_t lock;
+
+void test_t(void *arg) {
+	pthread_mutex_lock(&lock);
+	task++;
+	pthread_mutex_unlock(&lock);
+}
+
+void one_thread_one_job(void) {
+	threadpool tp;
+
+	int threads = 1;
+	int queue_size = 10;
+
+	if (threadpool_create(&tp, threads, queue_size) == 0)
+		printf("Threadpool created\n");
+
+	// Add a test task
+	if (threadpool_add(tp, &test_t, NULL) == 0)
+		printf("Added task\n");
+	
+	if (threadpool_exit(tp) == 0)
+		printf("Thread pool deleted\n");
+}
 
 
 void test_KV(void) {
@@ -352,6 +380,7 @@ void test_Vocabulary(void){
 }
 
 TEST_LIST = {
+	{ "one_thread_one_job", one_thread_one_job},
 	{ "keyvalue", test_KV },
 	{ "specs", test_Specs },
 	{ "clique", test_Clique },
