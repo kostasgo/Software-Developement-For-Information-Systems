@@ -57,8 +57,15 @@ double hypothesis(double* w, double* x, int size){
 
 }
 
+costFunctionDerivative(double* w, double** x, int size, int* y, int j, int batchSize, double learning_rate){
+  double sumErrors = 0;
+  for(int i=0; i<batchSize; i++){
+    double *xi= x[i];
+  }
+}
 
-void gradientDescent(double* w, double* x, int size, int y, double learning_rate){
+
+void gradientDescent(double* w, double** x, int size, int* y, double learning_rate, int batchSize){
   /*
   In this function we update the weights. Since the updated weights
   are the same minus the gradient times the learning rate we just need
@@ -75,7 +82,7 @@ void gradientDescent(double* w, double* x, int size, int y, double learning_rate
 }
 
 
-void logisticRegression(Classifier* logReg, double* x, int y, int iterations){
+void logisticRegression(Classifier* logReg, double** x, int* y, int iterations, int batchSize){
   /*
   We simply run gradientDescent() a number of given iterations
   to upadte the weight.

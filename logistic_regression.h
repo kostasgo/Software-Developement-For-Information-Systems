@@ -20,5 +20,5 @@ void deleteClassifier(Classifier*);
 double sigmoid(double);
 double hypothesis(double*, double*, int);
 void gradientDescent(double*, double*, int, int, double);
-void logisticRegression(Classifier*, double*, int, int);
+void logisticRegression(Classifier*, double**, int*, int, int);
 #endif

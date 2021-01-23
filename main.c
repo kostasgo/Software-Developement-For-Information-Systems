@@ -5,12 +5,13 @@ for the Univercity of Athens, Department of Informatics.
 Authors: Konstantinos Gkogkas, Nikolaos Sentis
 
 Compile: make
-Run: ./disambugator
+Run: ./modelTraining
 */
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "specs.h"
 #include "lowlevel-io.h"
 #include "clique.h"
@@ -39,7 +40,8 @@ Run: ./disambugator
 
 #define LEARNING_RATE 0.001
 
-#define LEARN_PERCENT 80
+#define TRAINING_PERCENT 60
+#define VALIDATION_PERCENT 20
 
 int main(int argc, char* argv[]){
 
@@ -65,11 +67,148 @@ int main(int argc, char* argv[]){
       printf("Running with large file!\n\n");
     }
     else{
-      printf("Usage: ./disambugator (-l)\n");
+      printf("Usage: ./modelTraining (-l)\n");
       return -1;
     }
 
   }
+/*
+Clique* cl1= createClique();
+Clique* cl2= createClique();
+Clique* cl3= createClique();
+Clique* cl4= createClique();
+
+Specs* specs;
+
+specs=NULL;
+specs=parser("buy.net","4233.json");
+insertClique(&cl1, specs);
+specs=NULL;
+specs=parser("buy.net","4236.json");
+insertClique(&cl1, specs);
+specs=NULL;
+specs=parser("buy.net","4239.json");
+insertClique(&cl1, specs);
+
+
+specs=NULL;
+specs=parser("buy.net","4247.json");
+insertClique(&cl2, specs);
+specs=NULL;
+specs=parser("buy.net","4255.json");
+insertClique(&cl2, specs);
+specs=NULL;
+specs=parser("buy.net","4258.json");
+insertClique(&cl2, specs);
+
+specs=NULL;
+specs=parser("buy.net","4261.json");
+insertClique(&cl3, specs);
+specs=NULL;
+specs=parser("buy.net","4266.json");
+insertClique(&cl3, specs);
+
+specs=NULL;
+specs=parser("buy.net","4272.json");
+insertClique(&cl4, specs);
+
+
+
+insertNegatives(&(cl2->negatives), cl3);
+insertNegatives(&(cl3->negatives), cl2);
+
+
+char** tempSet;
+int totalSize=0;
+char** returnSet=(char**)malloc(sizeof(char*)*(totalSize));
+int size,oldsize;
+
+size=-1;
+tempSet=getCliquePairs(cl1, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+size=-1;
+tempSet=getAllNegatives(cl1, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+
+size=-1;
+tempSet=getCliquePairs(cl2, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+size=-1;
+tempSet=getAllNegatives(cl2, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+
+size=-1;
+tempSet=getCliquePairs(cl3, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+size=-1;
+tempSet=getAllNegatives(cl3, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+size=-1;
+tempSet=getCliquePairs(cl4, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+size=-1;
+tempSet=getAllNegatives(cl4, &size);
+oldsize=(totalSize);
+(totalSize)+=size;
+returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
+for(int k=oldsize; k<(totalSize); k++){
+  returnSet[k]=strdup(tempSet[k-oldsize]);
+}
+free(tempSet);
+
+for(int i=0; i<totalSize; i++){
+  printf("%s\n",returnSet[i]);
+}
+
 
   int lineToStop=noOfLines*LEARN_PERCENT/100;
 
@@ -111,7 +250,7 @@ int main(int argc, char* argv[]){
     fprintf(fp2,"%s\n",csv[i]);
   }
 
-
+*/
 
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
@@ -170,29 +309,107 @@ int main(int argc, char* argv[]){
 
   printf("\nGoing through %s...\n",inputFile);
 
+  FILE *fp;
+  fp = fopen(inputFile, "r");
+  if(fp == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
 
-	FILE *fp3;
-  fp3= fopen("predictions.csv", "w");
+	FILE *fp2;
+  fp2= fopen("tempSet.csv", "w");
+  if(fp2 == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
+/*
+  printf("\nTraining the model using %d%% of the given file...\n",LEARN_PERCENT);
+  int linesTested=0;
+  //parse the csv to train and test the model
+*/
+
+  char *line = NULL;
+  size_t len=0;
+  getline(&line, &len, fp);
+
+  //printHashtable(cliques);
+  printf("Adjusting cliques...\n");
+  while(getline(&line, &len, fp) != -1){
+    parseCsv(line, cliques, vocabulary, bowSize, logReg);
+
+  }
+  fclose(fp);
+  //printHashtable(cliques);
+
+
+
+  printf("Creating final set...\n");
+  int totalSize=-1;
+  int skipcount=0;
+  char** tempSet = createFinalSet(cliques, &totalSize, &skipcount);
+
+  for(int i=0; i<totalSize; i++){
+    fprintf(fp2,"%s\n",tempSet[i]);
+  }
+  fclose(fp2);
+
+  for(int i=0; i<totalSize; i++){
+    free(tempSet[i]);
+  }
+  free(tempSet);
+
+
+  char command[100];
+  printf("deleting double 0s\n");
+  system("sort tempSet.csv | uniq > finalSet.csv");
+
+  //printf("totalsize : %d\n",totalSize);
+
+  FILE *fp3;
+  fp3= fopen("finalSet.csv", "r");
   if(fp3 == NULL){
     perror("Unable to open file!");
     exit(1);
   }
 
-  printf("\nTraining the model using %d%% of the given file...\n",LEARN_PERCENT);
-  int linesTested=0;
-  //parse the csv to train and test the model
-
-  for(int i=0; i<noOfLines; i++){
-    if(i==lineToStop){
-      printf("\nDoing predictions...\n");
-      linesTested=0;
-    }
-    parseCsv(csv[i], cliques, vocabulary, bowSize, logReg, i, fp3, lineToStop);
-    linesTested++;
+  line=NULL;
+  len=0;
+  int finalSize=0;
+  while(getline(&line, &len, fp3) != -1){
+    finalSize++;
+    //printf("%s\n",line);
   }
+
+  int trainingSize=finalSize*TRAINING_PERCENT/100;
+  int validationSize=finalSize*VALIDATION_PERCENT/100;
+  int testingSize=finalSize-(trainingSize+validationSize);
+
+
+  char** trainingSet=(char**)malloc(sizeof(char*)*trainingSize);
+  char** validationSet=(char**)malloc(sizeof(char*)*validationSize);
+  char** testingSet=(char**)malloc(sizeof(char*)*testingSize);
+
+  int c=0;
+  while(getline(&line, &len, fp3) != -1){
+    line[strlen(line)-1]='\0';
+    if(c<trainingSize){
+      trainingSet[c]=strdup(line);
+    }
+    else if(c>=trainingSize && c<(trainingSize+validationSize)){
+      validationSet[c-trainingSize]=strdup(line);
+    }
+    else{
+      testingSet[c-trainingSize-testingSize]=strdup(line);
+    }
+    //finalSize++;
+    //printf("%s\n",line);
+}
+
+  fclose(fp3);
+  for(int i=0; )
   FILE *fp4;
   fp4= fopen("statistics", "w");
-  if(fp3 == NULL){
+  if(fp4 == NULL){
     perror("Unable to open file!");
     exit(1);
   }
@@ -205,7 +422,7 @@ int main(int argc, char* argv[]){
     fprintf(fp4, "MEDIUM\n");
   }
 
-  fprintf(fp4, "\nPERCENTAGE OF FILE USED FOR TRAINING: %d\n\nLEARNING RATE: %lf\n\nMARGIN OF AVERAGE TF-IDFs ALLOWED: %lf\n\n",LEARN_PERCENT,LEARNING_RATE,MARGIN);
+  fprintf(fp4, "\nPERCENTAGE OF FILE USED FOR TRAINING: %d\n\nPERCENTAGE OF FILE USED FOR VALIDATION: %d\n\nLEARNING RATE: %lf\n\nMARGIN OF AVERAGE TF-IDFs ALLOWED: %lf\n\n",TRAINING_PERCENT,VALIDATION_PERCENT,LEARNING_RATE,MARGIN);
 
   fprintf(fp4, "FINAL VOCABULARY: \n--------------------------------------------\n");
   for(int i=0;i<bowSize;i++){
@@ -219,21 +436,18 @@ int main(int argc, char* argv[]){
 
   }
   free(inputFile);
-  outputToFile(cliques);
+
   deleteVocabulary(vocabulary);
 
   deleteHashtable(cliques);
   deleteList(specsList);
-  deleteClassifier(logReg);
+  deleteClassifier(logReg);/*
+
   for(int i=0; i<noOfLines; i++){
     free(csv[i]);
   }
-  free(csv);
+  free(csv);*/
 
-
-  fclose(fp);
-  fclose(fp2);
-  fclose(fp3);
   fclose(fp4);
 
   return 0;
