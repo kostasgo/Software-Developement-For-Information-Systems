@@ -98,7 +98,9 @@ void printBucket(Bucket* bucket){
     if(!strcmp(bucket->data[i]->id,"-" )){
       return;
     }
-    printf("%s\n",bucket->data[i]->id);
+    printf("%s. FLAG= %d\n ",bucket->data[i]->id, bucket->data[i]->flag);
+    printClique(bucket->data[i]->clique);
+    printf("\n\n");
   }
   if(bucket->next!=NULL){
     printf("Printing next bucket!\n");

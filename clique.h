@@ -32,11 +32,15 @@ void insertClique(Clique**, Specs*);
 void deleteCliqueList(CliqueNode *);
 void concatCliqueList(CliqueNode*, CliqueNode*);
 //void mergeCliques(Clique*, Clique*);
+int getCliqueSize(Clique*);
 void deleteClique(Clique *);
 void printClique(Clique*);
 int isInClique(char*, Clique*);
 int compareCliques(Clique*, Clique*);
 int areNegatives(Clique*, Clique*);
+char** getCliquePairs(Clique*, int *);
+char** getNegativePairs(Clique*, Clique*, int *);
+char** getAllNegatives(Clique*, int *);
 
 
 #endif

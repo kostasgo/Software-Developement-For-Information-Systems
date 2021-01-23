@@ -126,8 +126,10 @@ void printClique(Clique* clique){
 
   CliqueNode *temp = clique->list;
   printf("Clique size= %d\n",clique->size);
-  for(int i=0; i<clique->size;i++){
+  int i=0;
+  while(temp!=NULL){
     printf("Spec %d: %s\n",i,temp->specs->id);
+    i++;
     temp=temp->next;
   }
 }
@@ -167,4 +169,110 @@ int areNegatives(Clique* cl1, Clique* cl2){
     temp=temp->next;
   }
   return 0;
+}
+
+int getCliqueSize(Clique* cl){
+  CliqueNode* node=cl->list;
+  int size=0;
+  while(node!=NULL){
+    size++;
+    node=node->next;
+  }
+  return size;
+}
+
+char** getCliquePairs(Clique* cl, int *tableSize){
+  /*
+  Make a clique into pairs
+*/
+
+
+    int n=cl->size;
+    *tableSize=((n*(n-1))/2);
+    char **returnSet = (char**) malloc(sizeof(char*) * (*tableSize));
+    CliqueNode* temp1 = cl->list;
+    CliqueNode* temp2 = temp1;
+    int i=0;
+    while(temp1!=NULL){
+      temp2=temp2->next;
+      while(temp2!=NULL){
+        returnSet[i]=(char*)malloc(strlen(temp1->specs->id)+strlen(temp2->specs->id)+4);
+        sprintf(returnSet[i], "%s,%s,1",temp1->specs->id, temp2->specs->id);
+
+        temp2=temp2->next;
+        i++;
+      }
+      temp1=temp1->next;
+      temp2=temp1;
+    }
+
+    return returnSet;
+
+}
+
+
+char** getNegativePairs(Clique* cl1, Clique* cl2, int *tableSize){
+  //printf("negatives!\n");
+  //printClique(cl1);
+  //printClique(cl2);
+  int n=cl1->size;
+  int m=getCliqueSize(cl2);
+  *tableSize=n*m;
+  //printf("n: %d m: %d tableSize: %d\n",n,m,*tableSize);
+  char **returnSet = (char**) malloc(sizeof(char*) * (*tableSize));
+//  printf("tableSize: %d\n",*tableSize);
+  CliqueNode* temp1= cl1->list;
+  CliqueNode* temp2= cl2->list;
+  CliqueNode* head= temp2;
+  int i=0;
+
+  while(temp1!=NULL){
+
+    while(temp2!=NULL){
+      returnSet[i]=(char*)malloc(strlen(temp1->specs->id)+strlen(temp2->specs->id)+4);
+      sprintf(returnSet[i], "%s,%s,0",temp1->specs->id, temp2->specs->id);
+    //  printf("%d %s\n",i, returnSet[i]);
+      temp2=temp2->next;
+      i++;
+    }
+    temp1=temp1->next;
+    temp2=head;
+  }
+  //Update the dirty bit of the neg node of cl1 in cl2
+  NegListNode* negs=cl2->negatives;
+  while(negs!=NULL){
+    if(compareCliques(negs->clique,cl1)){
+      negs->dirtyBit=1;
+    }
+    negs=negs->next;
+  }
+  //printf("\n\n");
+  return returnSet;
+
+}
+
+char** getAllNegatives(Clique* cl, int *tableSize){
+  int size=-1;
+  (*tableSize)=0;
+  char** returnSet=(char**)malloc(sizeof(char*)*(*tableSize));
+  int oldsize;
+  NegListNode *negs=cl->negatives;
+  while(negs!=NULL){
+    if(negs->dirtyBit==0){
+      char** tempSet =getNegativePairs(cl, negs->clique, &size);
+      oldsize=(*tableSize);
+      (*tableSize)+=size;
+      //printf("%d %d\n", *tableSize, oldsize);
+      returnSet=(char**)realloc(returnSet, sizeof(char*)*(*tableSize));
+      for(int i=oldsize; i<(*tableSize); i++){
+        
+        returnSet[i]=strdup(tempSet[i-oldsize]);
+        free(tempSet[i-oldsize]);
+      }
+      negs->dirtyBit=1;
+      free(tempSet);
+    }
+    negs=negs->next;
+  }
+  return returnSet;
 }
