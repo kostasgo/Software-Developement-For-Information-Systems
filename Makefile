@@ -73,3 +73,4 @@ info :
 	@echo Univercity of Athens, Department of Informatics \& Telecomunications
 	@echo Konstantinos Gkogkas, 1115201200027
 	@echo Nikolaos Sentis, 1115200700156
+	@echo Konstantinos Maragkos, 11151400095

@@ -129,13 +129,14 @@ void filterSpec(Specs* specs, char** stopwords){
         currentString = strdup(temp);
         free(temp);
         insertCorrect(&specs, currentString);
+        free(currentString);
       }
       tempVal = tempVal->next;
     }
     temp = temp->next;
 
   }
-  deleteSpecsList(specs->list);
+  
 }
 
 

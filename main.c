@@ -406,7 +406,7 @@ for(int i=0; i<totalSize; i++){
 }
 
   fclose(fp3);
-  for(int i=0; )
+
   FILE *fp4;
   fp4= fopen("statistics", "w");
   if(fp4 == NULL){
@@ -436,7 +436,8 @@ for(int i=0; i<totalSize; i++){
 
   }
   free(inputFile);
-
+  free(line);
+  
   deleteVocabulary(vocabulary);
 
   deleteHashtable(cliques);

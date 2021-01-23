@@ -61,6 +61,11 @@ void insertHashtable(Hashtable **table, Specs *specs){
   input->id=strdup(specs->id); //rename the BucketData to the file's id
   input->clique=cl;
 
+  if(!strcmp(input->id,specs->id)){ //if the spec was actually found return
+
+    return;
+  }
+
 
 }
 

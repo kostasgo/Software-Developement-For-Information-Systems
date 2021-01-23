@@ -16,7 +16,7 @@ BucketData* createBucketData(char * str, Clique* clique){
 void deleteBucketData(BucketData* data){
   if(data->flag!=1){
     deleteClique(data->clique);
-
+    
   }
   free(data->id);
   free(data);

@@ -86,7 +86,8 @@ void deleteKV(KV_Pair* data){
   /*
   Deletes a KV_Pair struct, doing the apropriate frees.
   */
-  free(data->key);
   deleteValue(data->value);
+  free(data->key);
+
   free(data);
 }
