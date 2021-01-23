@@ -22,6 +22,7 @@ Run: ./modelTraining
 #include "bow.h"
 #include "words.h"
 #include "logistic_regression.h"
+#include "thread_pool.h"
 
 #define LARGE "Datasets/sigmod_large_labelled_dataset.csv"
 #define MEDIUM "Datasets/sigmod_medium_labelled_dataset.csv"
@@ -72,190 +73,18 @@ int main(int argc, char* argv[]){
     }
 
   }
+
 /*
-Clique* cl1= createClique();
-Clique* cl2= createClique();
-Clique* cl3= createClique();
-Clique* cl4= createClique();
-
-Specs* specs;
-
-specs=NULL;
-specs=parser("buy.net","4233.json");
-insertClique(&cl1, specs);
-specs=NULL;
-specs=parser("buy.net","4236.json");
-insertClique(&cl1, specs);
-specs=NULL;
-specs=parser("buy.net","4239.json");
-insertClique(&cl1, specs);
-
-
-specs=NULL;
-specs=parser("buy.net","4247.json");
-insertClique(&cl2, specs);
-specs=NULL;
-specs=parser("buy.net","4255.json");
-insertClique(&cl2, specs);
-specs=NULL;
-specs=parser("buy.net","4258.json");
-insertClique(&cl2, specs);
-
-specs=NULL;
-specs=parser("buy.net","4261.json");
-insertClique(&cl3, specs);
-specs=NULL;
-specs=parser("buy.net","4266.json");
-insertClique(&cl3, specs);
-
-specs=NULL;
-specs=parser("buy.net","4272.json");
-insertClique(&cl4, specs);
-
-
-
-insertNegatives(&(cl2->negatives), cl3);
-insertNegatives(&(cl3->negatives), cl2);
-
-
-char** tempSet;
-int totalSize=0;
-char** returnSet=(char**)malloc(sizeof(char*)*(totalSize));
-int size,oldsize;
-
-size=-1;
-tempSet=getCliquePairs(cl1, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-size=-1;
-tempSet=getAllNegatives(cl1, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-
-size=-1;
-tempSet=getCliquePairs(cl2, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-size=-1;
-tempSet=getAllNegatives(cl2, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-
-size=-1;
-tempSet=getCliquePairs(cl3, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-size=-1;
-tempSet=getAllNegatives(cl3, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-size=-1;
-tempSet=getCliquePairs(cl4, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-size=-1;
-tempSet=getAllNegatives(cl4, &size);
-oldsize=(totalSize);
-(totalSize)+=size;
-returnSet=(char**)realloc(returnSet, sizeof(char*)*(totalSize));
-for(int k=oldsize; k<(totalSize); k++){
-  returnSet[k]=strdup(tempSet[k-oldsize]);
-}
-free(tempSet);
-
-for(int i=0; i<totalSize; i++){
-  printf("%s\n",returnSet[i]);
-}
-
-
-  int lineToStop=noOfLines*LEARN_PERCENT/100;
-
-
-  char **csv = (char**)malloc(sizeof(char*)*noOfLines);
-
-
-
-  FILE *fp;
-  fp = fopen(inputFile, "r");
-  if(fp == NULL){
-    perror("Unable to open file!");
-    exit(1);
-  }
-  char *line = NULL;
-  size_t len=0;
-  getline(&line, &len, fp);
-  int c=0;
-  while(getline(&line, &len, fp) != -1){
-    //printf("%d\n",c);
-    line[strlen(line)-1]='\0';
-    csv[c]=strdup(line);
-    c++;
-
-  }
-  free(line);
-
-  FILE *fp2;
-  fp2 = fopen("testing.csv", "w");
-  if(fp2 == NULL){
-    perror("Unable to open file!");
-    exit(1);
-  }
-
-  shuffleArray(csv,noOfLines);
-
-  for(int i=lineToStop;i<noOfLines;i++){
-    //printf("%s\n",csv[i]);
-    fprintf(fp2,"%s\n",csv[i]);
-  }
-
+-----JSON SECTION---------------
+Parse the json files into specs: then clean them up and create
+the vocabulary, as well as the shrunk array of words that we are going to use.
 */
 
   char** stopwords= createStopWordsTable();
   ListNode* specsList=NULL;
   Hashtable* cliques = createHashtable(HASHTABLE_SIZE, BUCKET_SIZE);
   Vocabulary* vocabulary = createVocabulary(VOCABULARY_TABLE_SIZE, VOCABULARY_BUCKETSIZE);
+
 
 
   //Access Files
@@ -306,9 +135,15 @@ for(int i=0; i<totalSize; i++){
     printf("%d %s\n",i, bow[i]->str);
   }
 
+/*
+-----CSV SECTION---------------
+Parse the csv to adjust the cliques and create the sets:
+trainingSet, validationSet and testingSet.
+*/
 
   printf("\nGoing through %s...\n",inputFile);
 
+//open the input file for reading and a temporary set to save the final pairs
   FILE *fp;
   fp = fopen(inputFile, "r");
   if(fp == NULL){
@@ -323,6 +158,7 @@ for(int i=0; i<totalSize; i++){
     exit(1);
   }
 /*
+
   printf("\nTraining the model using %d%% of the given file...\n",LEARN_PERCENT);
   int linesTested=0;
   //parse the csv to train and test the model
@@ -332,16 +168,18 @@ for(int i=0; i<totalSize; i++){
   size_t len=0;
   getline(&line, &len, fp);
 
-  //printHashtable(cliques);
+  //run the csv file and adjust the cliques
+
   printf("Adjusting cliques...\n");
   while(getline(&line, &len, fp) != -1){
     parseCsv(line, cliques, vocabulary, bowSize, logReg);
 
   }
   fclose(fp);
-  //printHashtable(cliques);
 
 
+  //print all pairings into a file
+  //our fix to not printing negatives more than once did not work, so we solved this through the linux file system
 
   printf("Creating final set...\n");
   int totalSize=-1;
@@ -358,12 +196,13 @@ for(int i=0; i<totalSize; i++){
   }
   free(tempSet);
 
+  //sort the file and keep the unique lines into a new file using a system command.
 
   char command[100];
-  printf("deleting double 0s\n");
+
   system("sort tempSet.csv | uniq > finalSet.csv");
 
-  //printf("totalsize : %d\n",totalSize);
+  //open the file with all the pairings. this is the final set
 
   FILE *fp3;
   fp3= fopen("finalSet.csv", "r");
@@ -374,6 +213,9 @@ for(int i=0; i<totalSize; i++){
 
   line=NULL;
   len=0;
+
+  //get the size
+
   int finalSize=0;
   while(getline(&line, &len, fp3) != -1){
     finalSize++;
@@ -389,6 +231,8 @@ for(int i=0; i<totalSize; i++){
   char** validationSet=(char**)malloc(sizeof(char*)*validationSize);
   char** testingSet=(char**)malloc(sizeof(char*)*testingSize);
 
+  //create the partitions
+
   int c=0;
   while(getline(&line, &len, fp3) != -1){
     line[strlen(line)-1]='\0';
@@ -401,11 +245,40 @@ for(int i=0; i<totalSize; i++){
     else{
       testingSet[c-trainingSize-testingSize]=strdup(line);
     }
-    //finalSize++;
-    //printf("%s\n",line);
-}
 
+}
+  shuffleArray(trainingSet,trainingSize);
+  shuffleArray(validationSet,validationSize);
+  shuffleArray(testingSet,testingSize);
   fclose(fp3);
+
+/*
+-----TRAINING SECTION---------------
+Train the model in a number of epochs
+using multiple threads
+*/
+threadpool tp;
+
+/*
+-----VALIDATION SECTION---------------
+Use the validation set to resolve conflicts, until their Number
+is minimized
+*/
+
+
+
+/*
+-----TESTING SECTION---------------
+Use the testing set to test the predictions that the model is going to
+produce.
+*/
+
+
+/*
+-----FINAL SECTION---------------
+Finish Program
+Print statistics
+*/
 
   FILE *fp4;
   fp4= fopen("statistics", "w");
@@ -437,7 +310,7 @@ for(int i=0; i<totalSize; i++){
   }
   free(inputFile);
   free(line);
-  
+
   deleteVocabulary(vocabulary);
 
   deleteHashtable(cliques);
