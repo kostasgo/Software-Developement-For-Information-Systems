@@ -55,7 +55,9 @@ void mergeCliques(Hashtable* table, char* id1, char* id2){
 
   if(compareCliques(data1->clique,data2->clique)){return;}
 
-
+  //printf("sizes before: %d %d\n", data1->clique->size, data2->clique->size);
+  //printClique(data1->clique);
+  //printClique(data2->clique);
   if(data1->clique->size>=data2->clique->size){
     new = data1;
     old = data2;
@@ -69,15 +71,20 @@ void mergeCliques(Hashtable* table, char* id1, char* id2){
   concatCliqueList(new->clique->list,temp->list);
   new->clique->size=temp->size + new->clique->size;
 
+  NegListNode* negs=old->clique->negatives;
+  while(negs!=NULL){
+    insertNegatives(&(new->clique->negatives), negs->clique);
+    negs=negs->next;
+  }
 
 
   CliqueNode* node = old->clique->list;
   //printClique(old->clique);
   //printf("Size is: %d\n\n",old->clique->size);
   int size = old->clique->size;
-  for(int i=0; i<size; i++){
+  while(node!=NULL){
     //printf("%d\n",i);
-    int pos_temp=-1;
+
     BucketData* temp_data = searchHashtable(table, node->specs->id);
     //deleteClique(temp_data->clique);
     temp_data->clique=new->clique;
@@ -85,6 +92,11 @@ void mergeCliques(Hashtable* table, char* id1, char* id2){
     node=node->next;
 
   }
+  data1=searchHashtable(table, id1);
+  data2=searchHashtable(table, id2);
+  //printf("sizes after: %d %d\n", data1->clique->size, data2->clique->size);
+  //printClique(data1->clique);
+  //printClique(data2->clique);
 
 }
 
@@ -150,7 +162,7 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
   return array;
 }
 
-void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize, Classifier* logReg, int counter, FILE* fp, int lines){
+void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize, Classifier* logReg){
 	/*
 	This function reads a .csv line. Finds the two keys in the hashtable,
 	and merges their cliques if they are in different cliques, otherwise it inserts
@@ -179,7 +191,7 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
   else{
     mergeCliques(table, spec_1, spec_2);
   }
-
+/*
 
   //create x
   double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
@@ -189,9 +201,7 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
     x[i]=array1[i];
     x[bowSize + i]=array2[i];
   }
- /*for(int i=bowSize; i<2*bowSize; i++){
-    x[i]=array2[i];
-  }*/
+
   x[2*bowSize]=1;
 
   if(counter<lines){
@@ -213,25 +223,18 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
     int prediction;
     if(h>=0.5){
       prediction=1;
-      /*
-      if(areNegatives(data1->clique,data2->clique)){
-        prediction=0;
-      }*/
+
     }
     else{
       prediction=0;
-      /*
-      if(compareCliques(data1->clique,data2->clique)){
-        prediction=1;
-      }*/
+
     }
     fprintf(fp,"%s,%s,%d\n",spec_1,spec_2,prediction);
   }
-
   free(array1);
   free(array2);
   free(x);
-
+*/
   free(spec_1);
   free(spec_2);
 
@@ -239,59 +242,4 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
 
 
-}
-
-
-
-void outputToFile(Hashtable* table){
-	/*
-	Does the final output. Runs through the whole hashtable and
-	for for each clique that has at least two members, it prints every two
-	of its members in the accepted .csv format
-	*/
-	FILE *fp;
-  fp= fopen("output.csv", "w");
-  if(fp == NULL){
-    perror("Unable to open file!");
-    exit(1);
-  }
-
-  //fprintf(fp,"left_spec_id, right_spec_id, label\n");
-	for(int i=0; i<table->max;i++){
-		Bucket* temp= table->array[i];
-		while(temp!=NULL){
-			for(int j=0; j<temp->max; j++){
-				if(temp->data[j]->clique==NULL){
-					continue;
-				}
-				if(temp->data[j]->flag==1){
-					continue;
-				}
-				if(temp->data[j]->clique->size>1){
-
-					CliqueNode* head = temp->data[j]->clique->list;
-					CliqueNode* temp1 = head;
-					CliqueNode* temp2 = temp1;
-					//printf("%d\n", table->array[i]->size);
-				//	printClique(temp->array[j]);
-					while(temp1!=NULL){
-						temp2=temp2->next;
-						while(temp2!=NULL){
-							//printf("%s, %s\n",temp1->specs->id, temp2->specs->id);
-							fprintf(fp,"%s, %s, 1\n",temp1->specs->id, temp2->specs->id);
-							temp2=temp2->next;
-						}
-
-						temp1=temp1->next;
-						temp2=temp1;
-					}
-
-				}
-			}
-
-			temp=temp->next;
-		}
-
-	}
-	fclose(fp);
 }
