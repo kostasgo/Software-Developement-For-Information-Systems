@@ -57,39 +57,56 @@ double hypothesis(double* w, double* x, int size){
 
 }
 
-costFunctionDerivative(double* w, double** x, int size, int* y, int j, int batchSize, double learning_rate){
+double costFunctionDerivative(double* theta, double** x, int size, int* y, int j, int m, double learning_rate){
   double sumErrors = 0;
-  for(int i=0; i<batchSize; i++){
+  for(int i=0; i<m; i++){
     double *xi= x[i];
+    double xij =xi[j];
+    double hi= hypothesis(theta,x[i], size);
+    double error = (hi - y[i])*xij;
+    sumErrors += error;
   }
+  double ret= (double)(sumErrors * (double)(learning_rate/(double)m));
+  return ret;
 }
 
 
-void gradientDescent(double* w, double** x, int size, int* y, double learning_rate, int batchSize){
+double* gradientDescent(double* theta, double** x, int size, int* y, double learning_rate, int m){
   /*
   In this function we update the weights. Since the updated weights
   are the same minus the gradient times the learning rate we just need
   the gradient, which for a single y is (h(x)-y)*x(i)
   */
 
-  double error = hypothesis(w, x, size) - y;
 
-  for(int i = 0; i < size; i++){
-    double gradient = error * x[i];
-    w[i] = w[i] - learning_rate*gradient;
+  for(int j=0; j<size; j++){
+    double CFDerivative = costFunctionDerivative(theta, x, size, y, j, m, learning_rate);
+    theta[j]=theta[j]-CFDerivative;
   }
+  return theta;
+
 
 }
 
 
-void logisticRegression(Classifier* logReg, double** x, int* y, int iterations, int batchSize){
+double* logisticRegression(Classifier* logReg, double** x, int* y, int iterations, int m){
   /*
   We simply run gradientDescent() a number of given iterations
   to upadte the weight.
   */
 
-  for(int i = 0; i < iterations; i++){
-    gradientDescent(logReg->w, x, logReg->size, y, logReg->lr);
+  // weights to be returned
+
+  double *theta=(double*)malloc(sizeof(double)*(logReg->size));
+  //start them with what we got
+  for(int i=0; i<logReg->size; i++){
+    theta[i]=logReg->w[i];
   }
+   //renew for number of iterations
+  for(int i = 0; i < iterations; i++){
+    theta=gradientDescent(theta, x, logReg->size, y, logReg->lr, m);
+  }
+
+  return theta;
 
 }
