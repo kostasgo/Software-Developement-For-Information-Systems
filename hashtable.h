@@ -16,6 +16,6 @@ void deleteHashtable(Hashtable*);
 BucketData* searchHashtable(Hashtable*, char*);
 
 void printHashtable(Hashtable*);
-
+char** createFinalSet(Hashtable*, int *, int*);
 
 #endif

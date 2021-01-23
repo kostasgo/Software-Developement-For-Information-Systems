@@ -100,3 +100,62 @@ void printHashtable(Hashtable* table){
   }
   printf("\n");
 }
+
+char** createFinalSet(Hashtable* table, int *totalSize, int *skipcount){
+	/*
+	Does the final output. Runs through the whole hashtable and
+	for for each clique that has at least two members, it prints every two
+	of its members in the accepted .csv format
+	*/
+  (*skipcount)=0;
+  int oldsize, size;
+  (*totalSize)=0;
+  char** returnSet=(char**)malloc(sizeof(char*)*(*totalSize));
+  char** tempSet;
+  int c=0;
+	for(int i=0; i<table->max;i++){
+		Bucket* temp= table->array[i];
+		while(temp!=NULL){
+			for(int j=0; j<temp->max; j++){
+				if(temp->data[j]->clique==NULL){
+					continue;
+				}
+				if(temp->data[j]->flag==1){
+					continue;
+				}
+
+
+          c++;
+          size=-1;
+          tempSet=getCliquePairs(temp->data[j]->clique, &size);
+          oldsize=(*totalSize);
+          (*totalSize)+=size;
+          returnSet=(char**)realloc(returnSet, sizeof(char*)*(*totalSize));
+          for(int k=oldsize; k<(*totalSize); k++){
+              returnSet[k]=strdup(tempSet[k-oldsize]);
+              free(tempSet[k-oldsize]);
+
+          }
+          free(tempSet);
+
+        size=-1;
+        tempSet=getAllNegatives(temp->data[j]->clique, &size);
+        oldsize=(*totalSize);
+        (*totalSize)+=size;
+        //printf("%d totalSize: %d\n",c, *totalSize);
+        returnSet=(char**)realloc(returnSet, sizeof(char*)*(*totalSize));
+
+        for(int k=oldsize; k<(*totalSize); k++){
+          returnSet[k]=strdup(tempSet[k-oldsize]);
+          free(tempSet[k-oldsize]);
+
+        }
+        free(tempSet);
+			}
+
+			temp=temp->next;
+		}
+
+	}
+	return returnSet;
+}
