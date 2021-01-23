@@ -145,7 +145,6 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
     }
     temp=temp->next;
   }
-
   //go through the words in the file and see if they are in the bow.
   //if they are update the tf-idf in the array
   CorrectNode* current=specs->words;
@@ -162,12 +161,84 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
   return array;
 }
 
+
+double** createX(char** array, int start, int end, Hashtable* table, Vocabulary* vocabulary, int bowSize){
+  //define batchSize
+  int batchSize= end - start;
+
+  //allocate memory for x
+  double **x= (double**)malloc(sizeof(double*)*batchSize);
+
+  for(int i=start; i<end; i++){
+    //for each line in batch size
+    char line[200];
+    strcpy(line,array[i]);
+
+    char* spec_1, *spec_2, *temp;
+
+  	char delim[3] =",";
+
+  	char *token = strtok(line, delim);
+  	spec_1=strdup(token);
+
+  	token = strtok(NULL, delim);
+    spec_2 = strdup(token);
+
+    //get the tf-idf array for each spec
+
+    double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
+    double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
+
+    //pass them into x[i]
+    x[i-start] = (double*)malloc(sizeof(double)*(bowSize*2+1));
+    for(int j=0; j<bowSize; j++){
+      x[i-start][j]=array1[j];
+      x[i-start][bowSize + j]=array2[j];
+    }
+
+
+    //last position of x[i] is used for the bias
+    x[i-start][2*bowSize]=1;
+
+    free(array1);
+    free(array2);
+    free(spec_1);
+    free(spec_2);
+  }
+  return x;
+}
+
+double* createY(char** array, int start, int end){
+  int batchSize= end - start;
+
+  double* y=(double*)malloc(sizeof(double)*batchSize);
+
+  for(int i=start; i<end;i++){
+    char* spec_1, *spec_2, *temp;
+  	int label;
+
+    char line[200];
+    strcpy(line,array[i]);
+
+  	char delim[3] =",";
+
+  	char *token = strtok(line, delim);
+  	token = strtok(NULL, delim);
+  	token = strtok(NULL, delim);
+
+    label = strtol(token, &temp, 10);
+
+    y[i-start]=label;
+  }
+  return y;
+}
+
+
 void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize, Classifier* logReg){
 	/*
 	This function reads a .csv line. Finds the two keys in the hashtable,
 	and merges their cliques if they are in different cliques, otherwise it inserts
-  both cliques to each other's negatives lists. Afterwards it creates an
-  array of tf-idf for each spec, that will be used in the logistic regressor.
+  both cliques to each other's negatives lists.
 	*/
 
 	//printf("%s\n",line);
@@ -190,6 +261,8 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 	}
   else{
     mergeCliques(table, spec_1, spec_2);
+
+
   }
 /*
 

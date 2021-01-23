@@ -10,6 +10,8 @@ void shuffleArray(void* , size_t);
 void mergeCliques(Hashtable*, char*, char*);
 void updateNegatives(Hashtable*, char*, char*);
 double* getTfIdfArray(Hashtable*, char*, Vocabulary*, int);
+double** createX(char**, int, int, Hashtable*, Vocabulary*, int);
+double* createY(char**, int, int);
 void parseCsv(char*, Hashtable*, Vocabulary*, int, Classifier*);
 void outputToFile(Hashtable*);
 
