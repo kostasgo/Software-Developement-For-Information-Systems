@@ -85,7 +85,16 @@ double* gradientDescent(double* theta, double** x, int size, int* y, double lear
   }
   return theta;
 
+}
 
+double* singleGradient(double* theta, double* x, int size, int y, double learning_rate){
+  double h = hypothesis(theta, x, size);
+  double error= h-y;
+  for(int j=0;j<size;j++){
+    error=error*x[j];
+    theta[j]=theta[j]-learning_rate*error;
+  }
+  return theta;
 }
 
 
@@ -104,7 +113,13 @@ double* logisticRegression(Classifier* logReg, double** x, int* y, int iteration
   }
    //renew for number of iterations
   for(int i = 0; i < iterations; i++){
-    theta=gradientDescent(theta, x, logReg->size, y, logReg->lr, m);
+    if(m!=1){
+      theta=gradientDescent(theta, x, logReg->size, y, logReg->lr, m);
+    }
+    else{
+      theta=singleGradient(theta, *x, logReg->size, *y, logReg->lr);
+    }
+
   }
 
   return theta;

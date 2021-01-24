@@ -49,6 +49,7 @@ Run: ./modelTraining
 
 #define BATCHSIZE 1024
 
+
 int main(int argc, char* argv[]){
 
 /*

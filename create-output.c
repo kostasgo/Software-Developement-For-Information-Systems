@@ -177,7 +177,7 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
 
     char* spec_1, *spec_2, *temp;
 
-  	char delim[3] =",";
+  	char delim[2] =",";
 
   	char *token = strtok(line, delim);
   	spec_1=strdup(token);
@@ -221,7 +221,7 @@ double* createY(char** array, int start, int end){
     char line[200];
     strcpy(line,array[i]);
 
-  	char delim[3] =",";
+  	char delim[2] =",";
 
   	char *token = strtok(line, delim);
   	token = strtok(NULL, delim);
@@ -320,7 +320,8 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 
 int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocabulary* vocabulary){
 
-    Hashtable* temp_cliques = createHashtable(1000, 4);
+    ListNode* speclist=NULL;
+    Hashtable* temp_cliques = createHashtable(4000, 4);
 
     //create an x[] for each line of the array
     int bowSize = (((logReg->size)-1)/2);
