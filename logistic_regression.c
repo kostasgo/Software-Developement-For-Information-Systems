@@ -18,7 +18,7 @@ Classifier* createClassifier(int size, double learning_rate){
 
   for(int i = 0; i < size; i++){
 
-    logReg->w[i] = 0;
+    logReg->w[i] = 1;
   }
 
   return logReg;

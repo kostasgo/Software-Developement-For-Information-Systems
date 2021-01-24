@@ -41,21 +41,21 @@ Run: ./modelTraining
 
 #define LEARNING_RATE 0.001
 
-#define TRAINING_PERCENT 6
+#define TRAINING_PERCENT 60
 #define VALIDATION_PERCENT 20
 
-#define QUEUE_SIZE 1000
-#define THREAD_NUM 1
+#define QUEUE_SIZE 100
+#define THREAD_NUM 10
 
 #define BATCHSIZE 1024
 
-#define NUM_ITERS 1
+#define NUM_ITERS 10
 
 // Global thread vars
 
 int done = 0;                       // Number of finished tasks
 double *theta;                  // Shared memory for theta
-pthread_mutex_t lock;
+pthread_mutex_t lock, lock2;
 
 struct args {
   Classifier* logReg;
@@ -70,22 +70,23 @@ void batch_train(void* params) {
   Classifier *logReg = (Classifier*)((struct args*)params)->logReg;
   Hashtable *hashtable = (Hashtable*)((struct args*)params)->hashtable;
   Vocabulary *vocabulary = (Vocabulary*)((struct args*)params)->vocabulary;
-  char **array = ((struct args*)params)->array;
+  char **array = (char**)((struct args*)params)->array;
   int start = ((struct args*)params)->start;
   int end = ((struct args*)params)->end;
 
-  printf("%d, %d, %d\n", logReg->size, start, end);
+  //printf("%d, %d, %d, %d\n", done, logReg->size, start, end);
+  //printf("In thread %s\n", array[1]);
 
   int bowSize = (logReg->size-1)/2;
   // Create bath of X and Y
   double **bx = createX(array,start,end, hashtable, vocabulary,bowSize);
-  printf("createX OK\n");
+  //printf("createX OK\n");
   int *by = createY(array,start,end);
-  printf("createY OK\n");
+  //printf("createY OK\n");
 
   // Calculate theta
   double *tmp_theta = logisticRegression(logReg, bx, by, NUM_ITERS, BATCHSIZE);
-  printf("logRes OK\n");
+  //printf("logRes OK\n");
 
   // Write W
   pthread_mutex_lock(&lock);
@@ -93,6 +94,7 @@ void batch_train(void* params) {
     theta[i] += tmp_theta[i];
   }
   done++;
+  printf("Done Tasks %d\n", done);
 	pthread_mutex_unlock(&lock);
 }
 
@@ -292,21 +294,34 @@ trainingSet, validationSet and testingSet.
   char** testingSet=(char**)malloc(sizeof(char*)*testingSize);
 
   //create the partitions
+  fclose(fp3);
+  fp3= fopen("finalSet.csv", "r");
+  if(fp3 == NULL){
+    perror("Unable to open file!");
+    exit(1);
+  }
 
   int c=0;
+  line = NULL;
+  len = 0;
+  printf("FinalSize = %d, TrainingSize = %d, ValidationSize = %d, TestingSize = %d\n", finalSize, trainingSize, validationSize, testingSize);
   while(getline(&line, &len, fp3) != -1){
     line[strlen(line)-1]='\0';
     if(c<trainingSize){
       trainingSet[c]=strdup(line);
+      //printf("ts %d : %s\n", c, trainingSet[c]);
     }
     else if(c>=trainingSize && c<(trainingSize+validationSize)){
       validationSet[c-trainingSize]=strdup(line);
+      //printf("vs %d : %s\n", c, validationSet[c]);
     }
     else{
-      testingSet[c-trainingSize-testingSize]=strdup(line);
+      testingSet[c-(trainingSize+validationSize)]=strdup(line);
+      //printf("tests %d : %s\n", c, testingSet[c]);
     }
-
+    c++;
 }
+  printf("Finised\n");
   shuffleArray(trainingSet,trainingSize);
   shuffleArray(validationSet,validationSize);
   shuffleArray(testingSet,testingSize);
@@ -326,14 +341,9 @@ printf("\nTraining the model...\n");
 if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
   printf("Threadpool created\n");
 
-// Create parameter struct
-struct args *params= (struct args*)malloc(sizeof(struct args));
-params->logReg = logReg;
-params->vocabulary = vocabulary;
-params->hashtable = cliques;
-params->array = trainingSet;
 // Add tasks
-int code, tasks = trainingSize/BATCHSIZE + 1;
+int code, tasks = trainingSize/BATCHSIZE;
+struct args **params = (struct args**)malloc(sizeof(struct args*) * tasks);
 printf("Trying to add %d tasks\n", tasks);
 int start = 0, end = 0;
 for(int i=0; i<tasks;i++) {
@@ -341,34 +351,45 @@ for(int i=0; i<tasks;i++) {
   start = i * BATCHSIZE;
   end = start + BATCHSIZE;
   end = (end > trainingSize) ? trainingSize : end;
-  params->start = start;
-  params->end = end;
+  // Create parameter struct
+  params[i]= (struct args*)malloc(sizeof(struct args));
+  params[i]->logReg = logReg;
+  params[i]->vocabulary = vocabulary;
+  params[i]->hashtable = cliques;
+  params[i]->array = trainingSet;
+  params[i]->start = start;
+  params[i]->end = end;
 
-  printf("Adding task %d, range (%d - %d)...\n", i, start, end);
+  printf("Adding task %d, range (%d - %d)...\n", i+1, params[i]->start, params[i]->end);
   // Wait for emty spot in queue and add task
-  while( (code = threadpool_add(tp, &batch_train, params)) == -5) {
+  while( (code = threadpool_add(tp, &batch_train, params[i])) == -5) {
     printf("Retrying to add task %d...\n", i);
   }
+
   if (code != 0) {
     fprintf(stderr, "Error on %d\n", i);
     return code;
   }
-  printf("Added %d\n", i);
-
+  printf("Added %d\n", i+1);
 }
 
 //Wait all task to finish
 while (done < tasks) {
-  sleep(5);
+  usleep(10);
 }
 
+if (threadpool_exit(tp) == 0) printf("Thread pool deleted\n");
+for (int i=0; i<tasks; i++) {
+  free(params[i]);
+}
+free(params);
 
 // Calculate average W
 for (int i=0; i<logReg->size; i++) {
   theta[i] /= BATCHSIZE;
   logReg->w[i]=theta[i];
+  printf("%lf, ", logReg->w[i]);
 }
-
 
 /*
 -----VALIDATION SECTION---------------
@@ -376,8 +397,8 @@ Use the validation set to resolve conflicts, until their Number
 is minimized
 */
 printf("\nValidating and resolving conflicts...\n");
-//int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
-//printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
+int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
+printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 
 /*
 -----TESTING SECTION---------------
@@ -432,8 +453,6 @@ Free memory
   deleteClassifier(logReg);
 
   fclose(fp4);
-
-  free(params);
 
   return 0;
 

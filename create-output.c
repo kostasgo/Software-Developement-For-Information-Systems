@@ -167,6 +167,7 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
 double** createX(char** array, int start, int end, Hashtable* table, Vocabulary* vocabulary, int bowSize){
   //define batchSize
   int batchSize= end - start;
+  //printf("Batch size in createX = %d\n", batchSize);
 
   //allocate memory for x
   double **x= (double**)malloc(sizeof(double*)*batchSize);
@@ -174,20 +175,31 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
   for(int i=start; i<end; i++){
     //for each line in batch size
     char* line;
+    char *savep1;
+    //printf("%s\n", array[i]);
     line=strdup(array[i]);
-
+    
     char* spec_1, *spec_2, *temp;
 
   	char delim[2] =",";
 
-  	char *token = strtok(line, delim);
+  	char *token = strtok_r(line, delim, &savep1);
   	spec_1=strdup(token);
 
-  	token = strtok(NULL, delim);
+    //printf("After strtok1 %s\n", array[i]);
+
+  	token = strtok_r(NULL, delim, &savep1);
     spec_2 = strdup(token);
 
-    //get the tf-idf array for each spec
+    //printf("After strtok2 %s\n", array[i]);
 
+    //get the tf-idf array for each spec
+    if (!strcmp(spec_1, "0")) {
+      printf("%s\n", array[i]);
+    }
+    if (!strcmp(spec_2, "0")) {
+      printf("%s\n", array[i]);
+    }
     double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
     double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
 
@@ -214,20 +226,20 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
 int* createY(char** array, int start, int end){
   int batchSize= end - start;
 
-  double* y=(double*)malloc(sizeof(double)*batchSize);
+  int* y=(int*)malloc(sizeof(int)*batchSize);
 
   for(int i=start; i<end;i++){
     char* spec_1, *spec_2, *temp;
   	int label;
 
-    char* line;
+    char* line, *savep1;
     line=strdup(array[i]);
 
   	char delim[2] =",";
 
-  	char *token = strtok(line, delim);
-  	token = strtok(NULL, delim);
-  	token = strtok(NULL, delim);
+  	char *token = strtok_r(line, delim, &savep1);
+  	token = strtok_r(NULL, delim, &savep1);
+  	token = strtok_r(NULL, delim, &savep1);
 
     label = strtol(token, &temp, 10);
 
@@ -236,9 +248,6 @@ int* createY(char** array, int start, int end){
   }
   return y;
 }
-
-
-
 
 void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize, Classifier* logReg){
 	/*

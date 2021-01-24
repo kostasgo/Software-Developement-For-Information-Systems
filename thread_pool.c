@@ -50,6 +50,7 @@ void *job_scheduler(void *t_p) {
 
     // One less job
     tp->started--;
+    //printf("tp->stared = %d\n", tp->started);
 
     //Unlock
     pthread_mutex_unlock(&(tp->lock));
@@ -71,6 +72,7 @@ int threadpool_create(threadpool *tp, int thread_count, int queue_size) {
     (*tp)->queue_size = queue_size;
     (*tp)->head = (*tp)->tail = (*tp)->count = 0;
     (*tp)->shutdown = (*tp)->started = 0;
+    (*tp)->thread_count = 0;
 
     // Allocate thread and task queue
     (*tp)->threads = (pthread_t *)malloc(sizeof(pthread_t) * thread_count);
@@ -182,17 +184,17 @@ int threadpool_exit(threadpool tp) {
 
 
         // Waiting for all threads to end
+        //printf("tp->thread_count %d\n", tp->thread_count);
         for(int i = 0; i < tp->thread_count; i++) {
             if(pthread_join(tp->threads[i], NULL) != 0) {
                 fprintf(stderr, "Join error\n");
             }
+            //printf("Passed join %d\n", i);
         }
     } while(0);
 
     // Dealocate
-    threadpool_free(tp);
-
-    return 0;
+    return threadpool_free(tp);
 }
 
 int threadpool_free(threadpool tp)

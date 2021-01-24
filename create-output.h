@@ -11,7 +11,7 @@ void mergeCliques(Hashtable*, char*, char*);
 void updateNegatives(Hashtable*, char*, char*);
 double* getTfIdfArray(Hashtable*, char*, Vocabulary*, int);
 double** createX(char**, int, int, Hashtable*, Vocabulary*, int);
-double* createY(char**, int, int);
+int* createY(char**, int, int);
 void parseCsv(char*, Hashtable*, Vocabulary*, int, Classifier*);
 int validate(char**, int, Classifier*, Hashtable*, Vocabulary*);
 
