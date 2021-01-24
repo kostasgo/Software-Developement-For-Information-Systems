@@ -49,6 +49,8 @@ Run: ./modelTraining
 
 #define BATCHSIZE 1024
 
+#define NUM_ITERS 1
+
 // Global thread vars
 
 int done = 0;                       // Number of finished tasks
@@ -57,33 +59,32 @@ pthread_mutex_t lock;
 
 struct args {
   Classifier* logReg;
-  double** x;
-  int* y;
-  int iterations;
-  int m;
+  Hashtable* hashtable;
+  Vocabulary* vocabulary;
+  char** array;
   int start;
   int end;
 };
 
 void batch_train(void* params) {
   Classifier *logReg = ((struct args*)params)->logReg;
-  double **x = ((struct args*)params)->x;
-  int *y = ((struct args*)params)->y;
-  int iterations = ((struct args*)params)->iterations;
-  int m = ((struct args*)params)->m;
+  Hashtable *hashtable = ((struct args*)params)->hashtable;
+  Vocabulary *vocabulary = ((struct args*)params)->vocabulary;
+  char **array = ((struct args*)params)->array;
   int start = ((struct args*)params)->start;
   int end = ((struct args*)params)->end;
 
+  int bowSize = (logReg->size-1)/2;
   // Create bath of X and Y
-  double **bx;
-  int *by;
+  double **bx = createX(array,start,end, hashtable, vocabulary,bowSize);
+  int *by = createY(array,start,end);
 
   // Calculate theta
-  double *tmp_theta = logisticRegression(logReg, bx, by, iterations, m);
+  double *tmp_theta = logisticRegression(logReg, bx, by, NUM_ITERS, BATCHSIZE);
 
   // Write W
   pthread_mutex_lock(&lock);
-	for (int i=0; i<m; i++) {
+	for (int i=0; i<logReg->size; i++) {
     theta[i] += tmp_theta[i];
   }
   done++;
@@ -312,32 +313,34 @@ Train the model in a number of epochs
 using multiple threads
 */
 threadpool tp;
+theta=(double*)malloc(sizeof(double)*logReg->size);
+for(int i=0; i<logReg->size; i++){
+  theta[i]=0;
+}
 printf("\nTraining the model...\n");
 if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
   printf("Threadpool created\n");
 
 // Add tasks
-int code, tasks = finalSize/BATCHSIZE + 1;
+int code, tasks = trainingSize/BATCHSIZE + 1;
 int start = 0, end = 0;
 for(int i=0; i<tasks;i++) {
   // Calculate batch range
   start = i * BATCHSIZE;
-  end += BATCHSIZE - 1;
+  end = start + BATCHSIZE;
 
   // Create parameter struct
   struct args *params= (struct args*)malloc(sizeof(struct args));
-  /*
+
   params->logReg = logReg;
-  params->x = x;
-  params->y = y;
-  params->iterations = iterations;
-  params->m = m;
-  */
+  params->vocabulary = vocabulary;
+  params->hashtable = cliques;
+  params->array = trainingSet;
   params->start = start;
   params->end = end;
 
   // Wait for emty spot in queue and add task
-  while( (code = threadpool_add(tp, &batch_train, NULL)) == -5) {
+  while( (code = threadpool_add(tp, &batch_train, params)) == -5) {
     printf("Retrying to add task %d...\n", i);
   }
   if (code != 0) {
@@ -354,12 +357,13 @@ while (done < tasks) {
   sleep(5);
 }
 
-/*
+
 // Calculate average W
-for (int i=0; i<m; i++) {
+for (int i=0; i<logReg->size; i++) {
   theta[i] /= BATCHSIZE;
+  logReg->w[i]=theta[i];
 }
-*/
+
 
 /*
 -----VALIDATION SECTION---------------
@@ -367,8 +371,8 @@ Use the validation set to resolve conflicts, until their Number
 is minimized
 */
 printf("\nValidating and resolving conflicts...\n");
-int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
-printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
+//int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
+//printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 
 /*
 -----TESTING SECTION---------------
@@ -412,6 +416,7 @@ Free memory
     fprintf(fp4, "%lf\n", logReg->w[i]);
 
   }
+  free(theta);
   free(inputFile);
   free(line);
 

@@ -8,6 +8,7 @@
 #include "bow.h"
 #include "words.h"
 #include "logistic_regression.h"
+#include "bst.h"
 
 #define NUM_ITERS 10
 #define THRESHHOLD 0.3
@@ -172,8 +173,8 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
 
   for(int i=start; i<end; i++){
     //for each line in batch size
-    char line[200];
-    strcpy(line,array[i]);
+    char* line;
+    line=strdup(array[i]);
 
     char* spec_1, *spec_2, *temp;
 
@@ -205,11 +206,12 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
     free(array2);
     free(spec_1);
     free(spec_2);
+    free(line);
   }
   return x;
 }
 
-double* createY(char** array, int start, int end){
+int* createY(char** array, int start, int end){
   int batchSize= end - start;
 
   double* y=(double*)malloc(sizeof(double)*batchSize);
@@ -218,8 +220,8 @@ double* createY(char** array, int start, int end){
     char* spec_1, *spec_2, *temp;
   	int label;
 
-    char line[200];
-    strcpy(line,array[i]);
+    char* line;
+    line=strdup(array[i]);
 
   	char delim[2] =",";
 
@@ -230,6 +232,7 @@ double* createY(char** array, int start, int end){
     label = strtol(token, &temp, 10);
 
     y[i-start]=label;
+    free(line);
   }
   return y;
 }
@@ -327,23 +330,22 @@ int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocab
     int bowSize = (((logReg->size)-1)/2);
     double** x=createX(array, 0, size, table, vocabulary, bowSize);
 
-    double scores[size][3];//first column is the score (prediction accuracy) |
-                          //second column is the prediction (0 or 1)|
-                          //third one is the index
+    TreeNode* bst=NULL;
 
     for(int i=0; i<size; i++){
-      scores[i][2]=i; //keep the index of the array
+
       double h = hypothesis(logReg->w,x[i],logReg->size);//make a prediction for given row
 
-      //test if prediction was below 0.5 and adjust the score and the 3rd column accordingly
+      //test if prediction was below 0.5 and adjust the score and prediction accordingly
       double score;
+      int prediction;
       if (h<0.5){
         score=0.5-h;
-        scores[i][1]=0;
+        prediction=0;
       }
       else{
         score=h-0.5;
-        scores[i][1]=1;
+        prediction=1;
       }
       //if score below threshhold, ignore it (set it to 0)
       if(score<THRESHHOLD){
@@ -351,11 +353,18 @@ int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocab
       }
       //make score to be from 0 to 10
       score*= (double)20;
-      scores[i][0]=score;
+      bst=insertTree(bst, score, i, prediction, x[i]);
+
+    }
+
+    int totalConflicts= inOrderValidation(bst, array, temp_cliques, logReg, &speclist);
+    for(int i=0; i<size; i++){
       free(x[i]);
     }
     free(x);
-    //sort the array based on score
-
+    deleteTree(bst);
+    deleteList(speclist);
     deleteHashtable(temp_cliques);
+
+    return totalConflicts;
 }

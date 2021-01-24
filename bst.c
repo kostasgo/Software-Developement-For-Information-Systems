@@ -1,19 +1,13 @@
 // C program to insert a node in AVL tree
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-
-// An AVL tree node
-typedef struct TreeNodeType{
-	double key;
-  int index;
-  int prediction;
-  double* x;
-	struct TreeNodeType *left;
-	struct TreeNodeType *right;
-
-}TreeNode;
-
+#include "hashtable.h"
+#include "create-output.h"
+#include "bst.h"
+#include "logistic_regression.h"
+#include "linkedlist.h"
 
 
 /* Helper function that allocates a new node with the given key and
@@ -49,19 +43,19 @@ TreeNode* insertTree(TreeNode* node, double key, int index, int prediction, doub
 	return node;
 }
 
-// A utility function to print inOrder traversal
-// of the tree.
 
-int inOrder(TreeNode *root, char** array, Hashtable* table, Classifier* logReg, ListNode** speclist){
+
+int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier* logReg, ListNode** speclist){
   int totalConflicts=0;
   int rightConflicts,leftConflicts;
 	if(root != NULL)
 	{
-		rightConflicts=inOrder(root->right);
+		rightConflicts=inOrderValidation(root->right, array, table, logReg, speclist);
 
 
     //printf("%f %d\n", root->key, root->index);
     if(root->key!=0){
+
       char line[200];
       strcpy(line,array[root->index]);
 
@@ -99,8 +93,8 @@ int inOrder(TreeNode *root, char** array, Hashtable* table, Classifier* logReg, 
         Specs* spec2 =createSpecs(id2);
         insertList(speclist, spec1);
         insertList(speclist, spec2);
-        insertHashtable(table, spec1);
-        insertHashtable(table, spec2);
+        insertHashtable(&table, spec1);
+        insertHashtable(&table, spec2);
       }
 
       //CASE 2: SPEC 1 IS IN, SPEC 2 NOT
@@ -109,7 +103,7 @@ int inOrder(TreeNode *root, char** array, Hashtable* table, Classifier* logReg, 
 
         Specs* spec2=createSpecs(id2);
         insertList(speclist, spec2);
-        insertHashtable(table, spec2);
+        insertHashtable(&table, spec2);
         if(root->prediction ==1){
           mergeCliques(table, id1, id2);
         }
@@ -124,7 +118,7 @@ int inOrder(TreeNode *root, char** array, Hashtable* table, Classifier* logReg, 
 
         Specs* spec1=createSpecs(id1);
         insertList(speclist, spec1);
-        insertHashtable(table, spec1);
+        insertHashtable(&table, spec1);
         if(root->prediction ==1){
           mergeCliques(table, id1, id2);
         }
@@ -143,42 +137,42 @@ int inOrder(TreeNode *root, char** array, Hashtable* table, Classifier* logReg, 
             int retrain=0;
             logisticRegression(logReg, (&root->x), &retrain, 10, 1);
           }
+          else{
+            mergeCliques(table, id1, id2);
+          }
         }
         else{
-          updateNegatives(table, id1, id2);
+          if(compareCliques(data1->clique, data2->clique)){
+            totalConflicts++;
+            int retrain=1;
+            logisticRegression(logReg, (&root->x), &retrain, 10, 1);
+          }
+          else{
+            updateNegatives(table, id1, id2);
+          }
         }
       }
-
+      free(id1);
+      free(id2);
     }
 
 
-		leftConflicts=inOrder(root->left);
+		leftConflicts=inOrderValidation(root->left, array, table, logReg, speclist);
+
+    totalConflicts=totalConflicts+leftConflicts+rightConflicts;
 	}
+  return totalConflicts;
 }
 
-/* Driver program to test above function*/
-int main(){
-TreeNode *root = NULL;
+void deleteTree(TreeNode * t){
 
-/* Constructing tree given in the above figure */
-root = insertTree(root, 9, 0, 1);
-root = insertTree(root, 5, 1, 0);
-root = insertTree(root, 4, 2 ,1);
-root = insertTree(root, 8, 3 ,0);
-root = insertTree(root, 8.7, 4 ,1);
-root = insertTree(root, 3, 5 ,0);
+	if(t==NULL) return;
+	deleteTree(t->left);
+	deleteTree(t->right);
 
-/* The constructed AVL Tree would be
-			30
-		/ \
-		20 40
-		/ \	 \
-	10 25 50
-*/
+	free(t);
 
-printf("inOrder traversal of the constructed AVL"
-		" tree is \n");
-inOrder(root);
+	return;
 
-return 0;
+
 }

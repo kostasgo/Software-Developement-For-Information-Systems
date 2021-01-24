@@ -1,10 +1,10 @@
 CC = gcc
 EXEC = modelTraining
 TEST = test
-SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c negative-cliques.c bow.c words.c logistic_regression.c thread_pool.c
-HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h bow.h words.h logistic_regression.h thread_pool.h
-OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o bow.o create-output.o bucket.o linkedlist.o negative-cliques.o words.o logistic_regression.o thread_pool.o
-OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o negative-cliques.o create-output.o bow.o words.o logistic_regression.o lowlevel-io.o parser.o thread_pool.o
+SRCS = main.c specs.c lowlevel-io.c parser.c clique.c keyvalue.c hashtable.c create-output.c tests.c bucket.c linkedlist.c negative-cliques.c bow.c words.c logistic_regression.c thread_pool.c bst.c
+HDRS = specs.h lowlevel-io.h parser.h clique.h keyvalue.h hashtable.h create-output.h acutest.h bucket.h linkedlist.h negative-cliques.h bow.h words.h logistic_regression.h thread_pool.h bst.h
+OBJS = main.o specs.o lowlevel-io.o parser.o clique.o keyvalue.o hashtable.o bow.o create-output.o bucket.o linkedlist.o negative-cliques.o words.o logistic_regression.o thread_pool.o bst.o
+OBJS2 = tests.o specs.o clique.o keyvalue.o hashtable.o bucket.o linkedlist.o negative-cliques.o create-output.o bow.o words.o logistic_regression.o lowlevel-io.o parser.o thread_pool.o bst.o
 CSV = output.csv predictions.csv testing.csv finalSet.csv tempSet.csv
 FLAGS = -g3 -c
 
@@ -42,6 +42,9 @@ bow.o:
 
 linkedlist.o:
 	$(CC) $(FLAGS) linkedlist.c
+
+bst.o:
+	$(CC) $(FLAGS) bst.c
 
 bucket.o:
 	$(CC) $(FLAGS) bucket.c
