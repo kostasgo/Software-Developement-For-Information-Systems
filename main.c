@@ -49,6 +49,46 @@ Run: ./modelTraining
 
 #define BATCHSIZE 1024
 
+// Global thread vars
+
+int done = 0;                       // Number of finished tasks
+double *theta;                  // Shared memory for theta
+pthread_mutex_t lock;
+
+struct args {
+  Classifier* logReg;
+  double** x;
+  int* y;
+  int iterations;
+  int m;
+  int start;
+  int end;
+};
+
+void batch_train(void* params) {
+  Classifier *logReg = ((struct args*)params)->logReg;
+  double **x = ((struct args*)params)->x;
+  int *y = ((struct args*)params)->y;
+  int iterations = ((struct args*)params)->iterations;
+  int m = ((struct args*)params)->m;
+  int start = ((struct args*)params)->start;
+  int end = ((struct args*)params)->end;
+
+  // Create bath of X and Y
+  double **bx;
+  int *by;
+
+  // Calculate theta
+  double *tmp_theta = logisticRegression(logReg, bx, by, iterations, m);
+
+  // Write W
+  pthread_mutex_lock(&lock);
+	for (int i=0; i<m; i++) {
+    theta[i] += tmp_theta[i];
+  }
+  done++;
+	pthread_mutex_unlock(&lock);
+}
 
 int main(int argc, char* argv[]){
 
@@ -276,7 +316,50 @@ printf("\nTraining the model...\n");
 if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
   printf("Threadpool created\n");
 
+// Add tasks
+int code, tasks = finalSize/BATCHSIZE + 1;
+int start = 0, end = 0;
+for(int i=0; i<tasks;i++) {
+  // Calculate batch range
+  start = i * BATCHSIZE;
+  end += BATCHSIZE - 1;
 
+  // Create parameter struct
+  struct args *params= (struct args*)malloc(sizeof(struct args));
+  /*
+  params->logReg = logReg;
+  params->x = x;
+  params->y = y;
+  params->iterations = iterations;
+  params->m = m;
+  */
+  params->start = start;
+  params->end = end;
+
+  // Wait for emty spot in queue and add task
+  while( (code = threadpool_add(tp, &batch_train, NULL)) == -5) {
+    printf("Retrying to add task %d...\n", i);
+  }
+  if (code != 0) {
+    fprintf(stderr, "Error on %d\n", i);
+    return code;
+  }
+  //printf("Added %d\n", i);
+
+  free(params);
+}
+
+//Wait all task to finish
+while (done < tasks) {
+  sleep(5);
+}
+
+/*
+// Calculate average W
+for (int i=0; i<m; i++) {
+  theta[i] /= BATCHSIZE;
+}
+*/
 
 /*
 -----VALIDATION SECTION---------------
