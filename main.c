@@ -32,7 +32,7 @@ Run: ./modelTraining
 
 #define DATAPATH "Datasets/2013_camera_specs"
 
-#define HASHTABLE_SIZE 30000
+#define HASHTABLE_SIZE 25000
 #define BUCKET_SIZE 4
 #define VOCABULARY_TABLE_SIZE 10000
 #define VOCABULARY_BUCKETSIZE 6
@@ -41,8 +41,13 @@ Run: ./modelTraining
 
 #define LEARNING_RATE 0.001
 
-#define TRAINING_PERCENT 60
+#define TRAINING_PERCENT 6
 #define VALIDATION_PERCENT 20
+
+#define QUEUE_SIZE 1000
+#define THREAD_NUM 1
+
+#define BATCHSIZE 1024
 
 int main(int argc, char* argv[]){
 
@@ -267,6 +272,10 @@ using multiple threads
 */
 threadpool tp;
 printf("\nTraining the model...\n");
+if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
+  printf("Threadpool created\n");
+
+
 
 /*
 -----VALIDATION SECTION---------------

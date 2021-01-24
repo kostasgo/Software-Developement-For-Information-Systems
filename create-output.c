@@ -10,6 +10,7 @@
 #include "logistic_regression.h"
 
 #define NUM_ITERS 10
+#define THRESHHOLD 0.3
 
 void swapStrings(char** str1, char** str2){
   char* temp =*str1;
@@ -234,6 +235,8 @@ double* createY(char** array, int start, int end){
 }
 
 
+
+
 void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize, Classifier* logReg){
 	/*
 	This function reads a .csv line. Finds the two keys in the hashtable,
@@ -313,6 +316,45 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 
 
 	//printf("Merging...pos_1: %d pos_2: %d\n", pos_1, pos_2);
+}
 
+int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocabulary* vocabulary){
 
+    Hashtable* temp_cliques = createHashtable(1000, 4);
+
+    //create an x[] for each line of the array
+    int bowSize = (((logReg->size)-1)/2);
+    double** x=createX(array, 0, size, table, vocabulary, bowSize);
+
+    double scores[size][3];//first column is the score (prediction accuracy) |
+                          //second column is the prediction (0 or 1)|
+                          //third one is the index
+
+    for(int i=0; i<size; i++){
+      scores[i][2]=i; //keep the index of the array
+      double h = hypothesis(logReg->w,x[i],logReg->size);//make a prediction for given row
+
+      //test if prediction was below 0.5 and adjust the score and the 3rd column accordingly
+      double score;
+      if (h<0.5){
+        score=0.5-h;
+        scores[i][1]=0;
+      }
+      else{
+        score=h-0.5;
+        scores[i][1]=1;
+      }
+      //if score below threshhold, ignore it (set it to 0)
+      if(score<THRESHHOLD){
+        score=(double)0;
+      }
+      //make score to be from 0 to 10
+      score*= (double)20;
+      scores[i][0]=score;
+      free(x[i]);
+    }
+    free(x);
+    //sort the array based on score
+
+    deleteHashtable(temp_cliques);
 }
