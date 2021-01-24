@@ -32,7 +32,7 @@ Run: ./modelTraining
 
 #define DATAPATH "Datasets/2013_camera_specs"
 
-#define HASHTABLE_SIZE 25000
+#define HASHTABLE_SIZE 30000
 #define BUCKET_SIZE 4
 #define VOCABULARY_TABLE_SIZE 10000
 #define VOCABULARY_BUCKETSIZE 6
@@ -283,8 +283,9 @@ if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
 Use the validation set to resolve conflicts, until their Number
 is minimized
 */
-
-
+printf("\nValidating and resolving conflicts...\n");
+int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
+printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 
 /*
 -----TESTING SECTION---------------
