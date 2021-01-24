@@ -9,7 +9,7 @@ struct threadpool_ {
   pthread_mutex_t lock;
   pthread_cond_t notify;
   pthread_t *threads;
-  task*queue;
+  task  *queue;
   int thread_count;
   int queue_size;
   int head;                 // Current task queue head
@@ -115,11 +115,13 @@ int threadpool_add(threadpool tp, void (*function)(void *),void *arg) {
 
     int next = tp->tail + 1;
     if (next == tp->queue_size) next = 0;
+    int flag = 0;
 
     do {
         // Check if the task queue is full
         if(tp->count == tp->queue_size) {
             fprintf(stderr, "Full queue\n");
+            flag = 1;
             break;
         }
         // If thread pool is on shutdown
@@ -149,7 +151,7 @@ int threadpool_add(threadpool tp, void (*function)(void *),void *arg) {
         return -3;
     }
 
-    return 0;
+    return (flag == 0) ? 0 : -5;
 }
 
 int threadpool_exit(threadpool tp) {

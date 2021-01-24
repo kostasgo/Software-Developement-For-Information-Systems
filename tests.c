@@ -35,10 +35,12 @@ void one_thread_one_job(void) {
 	if (threadpool_add(tp, &test_t, NULL) == 0)
 		printf("Added task\n");
 
-	sleep(5); 
+	
 
 	if (threadpool_exit(tp) == 0)
 		printf("Thread pool deleted\n");
+
+	sleep(5); 
 }
 
 

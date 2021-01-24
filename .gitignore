@@ -1,0 +1,8 @@
+# ignore datasets
+Datasets
+data
+
+.vscode
+
+# ignore all object files
+*.o
