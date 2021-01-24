@@ -67,20 +67,25 @@ struct args {
 };
 
 void batch_train(void* params) {
-  Classifier *logReg = ((struct args*)params)->logReg;
-  Hashtable *hashtable = ((struct args*)params)->hashtable;
-  Vocabulary *vocabulary = ((struct args*)params)->vocabulary;
+  Classifier *logReg = (Classifier*)((struct args*)params)->logReg;
+  Hashtable *hashtable = (Hashtable*)((struct args*)params)->hashtable;
+  Vocabulary *vocabulary = (Vocabulary*)((struct args*)params)->vocabulary;
   char **array = ((struct args*)params)->array;
   int start = ((struct args*)params)->start;
   int end = ((struct args*)params)->end;
 
+  printf("%d, %d, %d\n", logReg->size, start, end);
+
   int bowSize = (logReg->size-1)/2;
   // Create bath of X and Y
   double **bx = createX(array,start,end, hashtable, vocabulary,bowSize);
+  printf("createX OK\n");
   int *by = createY(array,start,end);
+  printf("createY OK\n");
 
   // Calculate theta
   double *tmp_theta = logisticRegression(logReg, bx, by, NUM_ITERS, BATCHSIZE);
+  printf("logRes OK\n");
 
   // Write W
   pthread_mutex_lock(&lock);
@@ -321,24 +326,25 @@ printf("\nTraining the model...\n");
 if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
   printf("Threadpool created\n");
 
+// Create parameter struct
+struct args *params= (struct args*)malloc(sizeof(struct args));
+params->logReg = logReg;
+params->vocabulary = vocabulary;
+params->hashtable = cliques;
+params->array = trainingSet;
 // Add tasks
 int code, tasks = trainingSize/BATCHSIZE + 1;
+printf("Trying to add %d tasks\n", tasks);
 int start = 0, end = 0;
 for(int i=0; i<tasks;i++) {
   // Calculate batch range
   start = i * BATCHSIZE;
   end = start + BATCHSIZE;
-
-  // Create parameter struct
-  struct args *params= (struct args*)malloc(sizeof(struct args));
-
-  params->logReg = logReg;
-  params->vocabulary = vocabulary;
-  params->hashtable = cliques;
-  params->array = trainingSet;
+  end = (end > trainingSize) ? trainingSize : end;
   params->start = start;
   params->end = end;
 
+  printf("Adding task %d, range (%d - %d)...\n", i, start, end);
   // Wait for emty spot in queue and add task
   while( (code = threadpool_add(tp, &batch_train, params)) == -5) {
     printf("Retrying to add task %d...\n", i);
@@ -347,9 +353,8 @@ for(int i=0; i<tasks;i++) {
     fprintf(stderr, "Error on %d\n", i);
     return code;
   }
-  //printf("Added %d\n", i);
+  printf("Added %d\n", i);
 
-  free(params);
 }
 
 //Wait all task to finish
@@ -426,9 +431,9 @@ Free memory
   deleteList(specsList);
   deleteClassifier(logReg);
 
-
-
   fclose(fp4);
+
+  free(params);
 
   return 0;
 
