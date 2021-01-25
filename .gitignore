@@ -6,3 +6,12 @@ data
 
 # ignore all object files
 *.o
+
+#ignore executables
+
+modelTraining
+test
+
+#ignore .csv files
+
+*.csv
