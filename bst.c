@@ -60,8 +60,8 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //strcpy(line,array[root->index]);
       char* line;
       line = strdup(array[root->index]);
-      printf("line = %s\n", line);
-      printf("rk = %lf\n", root->key);
+      //printf("line = %s\n", line);
+    //  printf("rk = %lf\n", root->key);
 
       char* id1, *id2;
     	char delim[2] =",";

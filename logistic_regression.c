@@ -1,5 +1,6 @@
 #include "logistic_regression.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 
 
@@ -18,7 +19,7 @@ Classifier* createClassifier(int size, double learning_rate){
 
   for(int i = 0; i < size; i++){
 
-    logReg->w[i] = 1;
+    logReg->w[i] = 0;
   }
 
   return logReg;
@@ -113,6 +114,7 @@ double* logisticRegression(Classifier* logReg, double** x, int* y, int iteration
   }
    //renew for number of iterations
   for(int i = 0; i < iterations; i++){
+    //printf("Iteration: %d\n",i);
     if(m!=1){
       theta=gradientDescent(theta, x, logReg->size, y, logReg->lr, m);
     }

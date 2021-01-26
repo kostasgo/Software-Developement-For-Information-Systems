@@ -28,19 +28,17 @@ void one_thread_one_job(void) {
 	int threads = 1;
 	int queue_size = 10;
 
-	if (threadpool_create(&tp, threads, queue_size) == 0)
-		printf("Threadpool created\n");
+	TEST_ASSERT(threadpool_create(&tp, threads, queue_size) == 0);
+
 
 	// Add a test task
-	if (threadpool_add(tp, &test_t, NULL) == 0)
-		printf("Added task\n");
+	TEST_ASSERT(threadpool_add(tp, &test_t, NULL) == 0);
 
-	
 
-	if (threadpool_exit(tp) == 0)
-		printf("Thread pool deleted\n");
 
-	sleep(5); 
+
+	TEST_ASSERT(threadpool_exit(tp) == 0);
+
 }
 
 
@@ -109,7 +107,7 @@ void test_Parser(void){
 	// Test if the last pair of values of the spec is as expected
 	TEST_ASSERT(!strcmp(pair->key, "wifi") && !strcmp(pair->value->str, "Yes"));
 
-	deleteSpecsList(test->list);
+
 	deleteSpecs(test);
 
 }

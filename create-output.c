@@ -11,7 +11,7 @@
 #include "bst.h"
 
 #define NUM_ITERS 10
-#define THRESHHOLD 0.3
+#define THRESHHOLD 0.001131
 
 void swapStrings(char** str1, char** str2){
   char* temp =*str1;
@@ -178,7 +178,7 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
     char *savep1;
     //printf("%s\n", array[i]);
     line=strdup(array[i]);
-    
+
     char* spec_1, *spec_2, *temp;
 
   	char delim[2] =",";
@@ -332,6 +332,8 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 
 int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocabulary* vocabulary){
 
+    printf("Validation: size: %d\n",size);
+
     ListNode* speclist=NULL;
     Hashtable* temp_cliques = createHashtable(4000, 4);
 
@@ -357,9 +359,12 @@ int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocab
         prediction=1;
       }
       //if score below threshhold, ignore it (set it to 0)
+      printf("%s\n",array[i]);
+      printf("%lf\n\n",h);
       if(score<THRESHHOLD){
         score=(double)0;
       }
+
       //make score to be from 0 to 10
       score*= (double)20;
       bst=insertTree(bst, score, i, prediction, x[i]);
