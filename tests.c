@@ -11,6 +11,7 @@
 #include "create-output.h"
 #include "bow.h"
 #include "thread_pool.h"
+#include "logistic_regression.h"
 
 // global vars for threads
 int task = 0;
@@ -381,6 +382,32 @@ void test_Vocabulary(void){
 
 }
 
+void test_logistic_regression(void){
+	Classifier* lg1 = createClassifier(3,0.1);
+	TEST_ASSERT(lg1!=NULL);
+	double** x=(double**)malloc(sizeof(double*)*4);
+	int y[4];
+	printf("\n");
+	for(int i=0; i<4; i++){
+		x[i]=(double*)malloc(sizeof(double)*3);
+		y[i]=i%2;
+		printf("y: %d, x: ",y[i]);
+		for(int j=0; j<3; j++){
+			x[i][j]=(i+1)*(j+1);
+			printf("%lf ",x[i][j]);
+		}
+		printf("\n");
+
+	}
+	double* theta=logisticRegression(lg1, x, y, 10, 4);
+	for(int i=0;i<3;i++){
+		printf("%lf\n",theta[i]);
+	}
+	printf("hypothesis x[0]: %lf\n",hypothesis(theta,x[1],3));
+
+
+}
+
 TEST_LIST = {
 	{ "one_thread_one_job", one_thread_one_job},
 	{ "keyvalue", test_KV },
@@ -391,5 +418,6 @@ TEST_LIST = {
 	{ "lowlevel-io", test_LLIO },
 	{ "parser", test_Parser },
 	{ "vocabulary", test_Vocabulary },
+	{ "logReg", test_logistic_regression },
 	{ NULL, NULL }
 };

@@ -11,7 +11,8 @@
 #include "bst.h"
 
 #define NUM_ITERS 10
-#define THRESHHOLD 0.001131
+#define THRESHHOLD 0.05
+#define PRED_THRESH 0.3
 
 void swapStrings(char** str1, char** str2){
   char* temp =*str1;
@@ -154,7 +155,7 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
     Word* word=searchVocabulary(vocabulary, current->word);
     //word = searchVocabulary(vocabulary, current->word);
     if(word->index!=-1){
-      array[word->index]=word->idf*current->tf;
+      array[word->index]=current->counter;
 
     }
     current=current->next;
@@ -194,12 +195,7 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
     //printf("After strtok2 %s\n", array[i]);
 
     //get the tf-idf array for each spec
-    if (!strcmp(spec_1, "0")) {
-      printf("%s\n", array[i]);
-    }
-    if (!strcmp(spec_2, "0")) {
-      printf("%s\n", array[i]);
-    }
+
     double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
     double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
 
@@ -333,7 +329,9 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocabulary* vocabulary){
 
     printf("Validation: size: %d\n",size);
-
+    int totalPredictions=0;
+    int totalPredictionsKept=0;
+    int totalKept=0;
     ListNode* speclist=NULL;
     Hashtable* temp_cliques = createHashtable(4000, 4);
 
@@ -350,31 +348,44 @@ int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocab
       //test if prediction was below 0.5 and adjust the score and prediction accordingly
       double score;
       int prediction;
-      if (h<0.5){
-        score=0.5-h;
+      if (h<PRED_THRESH){
+        score=(PRED_THRESH-h);
         prediction=0;
       }
       else{
-        score=h-0.5;
+        score=h-PRED_THRESH;
+        double bonus=(0.5-PRED_THRESH)/5;
+        score=score+bonus;
         prediction=1;
       }
       //if score below threshhold, ignore it (set it to 0)
-      printf("%s\n",array[i]);
-      printf("%lf\n\n",h);
+      //printf("%s\n",array[i]);
+      for(int j=0; j<logReg->size;j++){
+        //printf("%lf, ",x[i][j]);
+      }
+
+
       if(score<THRESHHOLD){
         score=(double)0;
       }
 
       //make score to be from 0 to 10
       score*= (double)20;
+      //printf("hypothesis: %lf score: %lf prediction: %d\n\n",h,score,prediction);
       bst=insertTree(bst, score, i, prediction, x[i]);
-
+      if(prediction==1) totalPredictions++;
+      if(score!=0) totalKept++;
+      if(score!=0 && prediction==1) totalPredictionsKept++;
     }
+    printf("total ones: %d\n",totalPredictions);
+    printf("total ones kept: %d\n",totalPredictionsKept);
+    printf("total kept: %d\n",totalKept);
 
     int totalConflicts= inOrderValidation(bst, array, temp_cliques, logReg, &speclist);
     for(int i=0; i<size; i++){
       free(x[i]);
     }
+
     free(x);
     deleteTree(bst);
     deleteList(speclist);

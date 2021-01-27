@@ -37,9 +37,9 @@ Run: ./modelTraining
 #define VOCABULARY_TABLE_SIZE 10000
 #define VOCABULARY_BUCKETSIZE 6
 
-#define MARGIN 0.0016
+#define MARGIN 0.0029
 
-#define LEARNING_RATE 0.001
+#define LEARNING_RATE 0.1
 
 #define TRAINING_PERCENT 60
 #define VALIDATION_PERCENT 20
@@ -49,9 +49,9 @@ Run: ./modelTraining
 
 #define BATCHSIZE 256
 
-#define NUM_ITERS 20
+#define NUM_ITERS 5
 
-#define EPOCHS 3
+#define EPOCHS 1
 // Global thread vars
 
 int done = 0;                       // Number of finished tasks
@@ -108,6 +108,9 @@ Start Program
 Initialize input variables and data structures
 
 */
+
+
+
 
   char* inputFile;
   int noOfLines;
@@ -342,6 +345,9 @@ using multiple threads
     printf("Threadpool created\n");
 
   for(int j=0;j<EPOCHS;j++){
+    pthread_mutex_lock(&lock);
+    done=0;
+    pthread_mutex_unlock(&lock);
     printf("\n\n---------------------------\nEPOCH %d\n\n",j+1);
     // Add tasks
     for(int i=0; i<logReg->size; i++){
@@ -377,6 +383,7 @@ using multiple threads
         return code;
       }
       printf("Added %d\n", i+1);
+
     }
 
     //Wait all task to finish
@@ -385,20 +392,15 @@ using multiple threads
     }
 
     // Calculate average W
-    printf("Before\n\n");
-    for (int i=0; i<logReg->size; i++) {
-      printf("%lf, ", theta[i]);
-      theta[i] /= tasks;
 
-
-    }
 
     printf("Now after\n\n");
     for (int i=0; i<logReg->size; i++) {
+      theta[i] /= tasks;
       logReg->w[i]=theta[i];
       printf("%lf, ", logReg->w[i]);
-
     }
+    printf("\n");
 
     for (int i=0; i<tasks; i++) {
       free(params[i]);
@@ -407,7 +409,7 @@ using multiple threads
   }
 
 
-  if (threadpool_exit(tp) == 0) printf("Thread pool deleted\n");
+  if (threadpool_exit(tp) == 0) printf("\nThread pool deleted\n");
 /*
 -----VALIDATION SECTION---------------
 Use the validation set to resolve conflicts, until their Number
@@ -417,6 +419,14 @@ is minimized
   int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
   printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 
+  totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
+  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
+
+  totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
+  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
+
+  totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
+  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 /*
 -----TESTING SECTION---------------
 Use the testing set to test the predictions that the model is going to

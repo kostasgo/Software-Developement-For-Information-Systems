@@ -60,8 +60,8 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //strcpy(line,array[root->index]);
       char* line;
       line = strdup(array[root->index]);
-      //printf("line = %s\n", line);
-    //  printf("rk = %lf\n", root->key);
+    //  printf("%s\n", line);
+    //  printf("score: %lf prediction: %d\n", root->key, root->prediction);
 
       char* id1, *id2;
     	char delim[2] =",";
@@ -93,6 +93,7 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 1: NONE OF THEM IS IN THE HASHTABLE
 
       if((!id1_isIn) && (!id2_isIn)){
+				//printf("CASE 1\n");
         Specs* spec1 =createSpecs(id1);
         Specs* spec2 =createSpecs(id2);
         insertList(speclist, spec1);
@@ -104,7 +105,7 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 2: SPEC 1 IS IN, SPEC 2 NOT
 
       if((id1_isIn) && (!id2_isIn)){
-
+				//printf("CASE 2\n");
         Specs* spec2=createSpecs(id2);
         insertList(speclist, spec2);
         insertHashtable(&table, spec2);
@@ -119,7 +120,7 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 3: SPEC 2 IS IN, SPEC 1 NOT
 
       if((!id1_isIn) && (id2_isIn)){
-
+				//printf("CASE 3\n");
         Specs* spec1=createSpecs(id1);
         insertList(speclist, spec1);
         insertHashtable(&table, spec1);
@@ -134,12 +135,16 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 4: BOTH ARE IN THE HASHTABLE
 
       if((id1_isIn) && (id2_isIn)){
-
+			//	printf("CASE 4\n");
         if(root->prediction ==1){
           if(areNegatives(data1->clique, data2->clique)){
             totalConflicts++;
             int retrain=0;
-            logisticRegression(logReg, (&root->x), &retrain, 10, 1);
+            double* theta =logisticRegression(logReg, (&root->x), &retrain, 20, 1);
+						for(int i=0; i<logReg->size; i++){
+							logReg->w[i]=theta[i];
+						}
+						printf("UPDATED!\n");
           }
           else{
             mergeCliques(table, id1, id2);
@@ -149,7 +154,11 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
           if(compareCliques(data1->clique, data2->clique)){
             totalConflicts++;
             int retrain=1;
-            logisticRegression(logReg, (&root->x), &retrain, 10, 1);
+						double* theta =logisticRegression(logReg, (&root->x), &retrain, 20, 1);
+						for(int i=0; i<logReg->size; i++){
+							logReg->w[i]=theta[i];
+						}
+						printf("UPDATED!\n");
           }
           else{
             updateNegatives(table, id1, id2);

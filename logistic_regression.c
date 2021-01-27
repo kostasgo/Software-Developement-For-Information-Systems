@@ -38,9 +38,11 @@ double sigmoid(double z){
   /*
   The sigmoid function.
   */
+  //printf("z: %lf\n",z);
   double temp=-1.0 * z;
-  return (1.0 / (double)(1.0 + exp(temp)));
-
+  double ret= (1.0 / (double)(1.0 + exp(temp)));
+  //printf("sigmoid(z): %lf\n\n",ret);
+  return ret;
 }
 
 
@@ -60,14 +62,19 @@ double hypothesis(double* w, double* x, int size){
 
 double costFunctionDerivative(double* theta, double** x, int size, int* y, int j, int m, double learning_rate){
   double sumErrors = 0;
+  //printf("m is: %d\n",m);
   for(int i=0; i<m; i++){
-    double *xi= x[i];
-    double xij =xi[j];
+    double xij= x[i][j];
+  //  printf("x[i][j] is %lf\n",xij);
+  //  double xij =xi[j];
     double hi= hypothesis(theta,x[i], size);
     double error = (hi - y[i])*xij;
     sumErrors += error;
   }
-  double ret= (double)(sumErrors * (double)(learning_rate/(double)m));
+  double constant = learning_rate/m;
+
+  double ret= (double)(sumErrors * constant);
+//  printf("summerrors %lf constant %lf ret %lf\n",sumErrors, constant, ret);
   return ret;
 }
 
@@ -81,8 +88,10 @@ double* gradientDescent(double* theta, double** x, int size, int* y, double lear
 
 
   for(int j=0; j<size; j++){
+  //  printf("%d\n",j);
     double CFDerivative = costFunctionDerivative(theta, x, size, y, j, m, learning_rate);
     theta[j]=theta[j]-CFDerivative;
+    //printf("new theta[%d]: %lf\n\n",j,theta[j]);
   }
   return theta;
 
@@ -111,10 +120,11 @@ double* logisticRegression(Classifier* logReg, double** x, int* y, int iteration
   //start them with what we got
   for(int i=0; i<logReg->size; i++){
     theta[i]=logReg->w[i];
+  //  printf("%d, %lf\n",i,theta[i]);
   }
    //renew for number of iterations
   for(int i = 0; i < iterations; i++){
-    //printf("Iteration: %d\n",i);
+  //  printf("Iteration: %d\n",i);
     if(m!=1){
       theta=gradientDescent(theta, x, logReg->size, y, logReg->lr, m);
     }
