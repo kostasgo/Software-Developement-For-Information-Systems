@@ -385,25 +385,40 @@ void test_Vocabulary(void){
 void test_logistic_regression(void){
 	Classifier* lg1 = createClassifier(3,0.1);
 	TEST_ASSERT(lg1!=NULL);
-	double** x=(double**)malloc(sizeof(double*)*4);
+	SparseV **x=(SparseV**)malloc(sizeof(SparseV*)*4);
+	double x1[3], x2[3], x3[3], x4[3];
 	int y[4];
 	printf("\n");
-	for(int i=0; i<4; i++){
-		x[i]=(double*)malloc(sizeof(double)*3);
-		y[i]=i%2;
-		printf("y: %d, x: ",y[i]);
-		for(int j=0; j<3; j++){
-			x[i][j]=(i+1)*(j+1);
-			printf("%lf ",x[i][j]);
-		}
-		printf("\n");
+	x1[0]=0;
+	x1[1]=1;
+	x1[2]=0;
 
-	}
+	x2[0]=4;
+	x2[1]=0;
+	x2[2]=1.5;
+
+	x3[0]=0;
+	x3[1]=0;
+	x3[2]=9;
+
+	x4[0]=0;
+	x4[1]=0;
+	x4[2]=12;
+
+	x[0]=createSparseV(x1, 3, 1);
+	x[1]=createSparseV(x2, 3, 2);
+	x[2]=createSparseV(x3, 3, 1);
+	x[3]=createSparseV(x4, 3, 1);
+
+	y[0]=0;
+	y[1]=1;
+	y[2]=0;
+	y[3]=1;
 	double* theta=logisticRegression(lg1, x, y, 10, 4);
 	for(int i=0;i<3;i++){
 		printf("%lf\n",theta[i]);
 	}
-	printf("hypothesis x[0]: %lf\n",hypothesis(theta,x[1],3));
+	printf("hypothesis x[0]: %lf\n",hypothesis(theta,x[0]));
 
 
 }

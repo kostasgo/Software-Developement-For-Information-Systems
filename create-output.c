@@ -123,9 +123,10 @@ void updateNegatives(Hashtable* table, char* id1, char* id2){
   insertNegatives(&(data2->clique->negatives), data1->clique);
 }
 
-double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bowSize){
+SparseV* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bowSize){
 
   //create an array of doubles and fill it with 0
+
   double* array=(double*)malloc(sizeof(double)*bowSize);
   for(int i=0; i<bowSize; i++){
     array[i]=0;
@@ -135,7 +136,7 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
   BucketData* data=searchHashtable(table, id);
   if(data->clique==NULL){
 		printf("%s not in hashtable\n",id);
-		return array;
+		return NULL;
 	}
 
 	CliqueNode* temp=data->clique->list;
@@ -151,27 +152,39 @@ double* getTfIdfArray(Hashtable* table, char* id, Vocabulary* vocabulary, int bo
   //go through the words in the file and see if they are in the bow.
   //if they are update the tf-idf in the array
   CorrectNode* current=specs->words;
+  int counter=0;
   while(current!=NULL){
     Word* word=searchVocabulary(vocabulary, current->word);
-    //word = searchVocabulary(vocabulary, current->word);
+
     if(word->index!=-1){
-      array[word->index]=current->counter;
+      if(array[word->index]==0){
+        counter++;
+        //printf("%d: %d, %s, %d\n", counter, word->index, word->str, current->counter);
+        array[word->index]=current->counter;
+      }
+      else{
+        array[word->index]+=current->counter;
+      }
+
 
     }
     current=current->next;
   }
 
-  return array;
+  SparseV* x=createSparseV(array, bowSize, counter);
+  //printSparseV(x);
+
+  return x;
 }
 
 
-double** createX(char** array, int start, int end, Hashtable* table, Vocabulary* vocabulary, int bowSize){
+SparseV** createX(char** array, int start, int end, Hashtable* table, Vocabulary* vocabulary, int bowSize){
   //define batchSize
   int batchSize= end - start;
   //printf("Batch size in createX = %d\n", batchSize);
 
   //allocate memory for x
-  double **x= (double**)malloc(sizeof(double*)*batchSize);
+  SparseV **x= (SparseV**)malloc(sizeof(SparseV*)*batchSize);
 
   for(int i=start; i<end; i++){
     //for each line in batch size
@@ -196,22 +209,21 @@ double** createX(char** array, int start, int end, Hashtable* table, Vocabulary*
 
     //get the tf-idf array for each spec
 
-    double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
-    double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
+    SparseV* v1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
+
+    SparseV* v2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
+
+
 
     //pass them into x[i]
-    x[i-start] = (double*)malloc(sizeof(double)*(bowSize*2+1));
-    for(int j=0; j<bowSize; j++){
-      x[i-start][j]=array1[j];
-      x[i-start][bowSize + j]=array2[j];
-    }
+    x[i-start] = concatSparseV(v1, v2, bowSize);
+
+    //printSparseV(x[i-start]);
+
 
 
     //last position of x[i] is used for the bias
-    x[i-start][2*bowSize]=1;
 
-    free(array1);
-    free(array2);
     free(spec_1);
     free(spec_2);
     free(line);
@@ -275,50 +287,7 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 
 
   }
-/*
 
-  //create x
-  double* array1= getTfIdfArray(table, spec_1, vocabulary, bowSize);
-  double* array2= getTfIdfArray(table, spec_2, vocabulary, bowSize);
-  double* x = (double*)malloc(sizeof(double)*(bowSize*2+1));
-  for(int i=0; i<bowSize; i++){
-    x[i]=array1[i];
-    x[bowSize + i]=array2[i];
-  }
-
-  x[2*bowSize]=1;
-
-  if(counter<lines){
-    //train the model
-    logisticRegression(logReg, x, label, NUM_ITERS);
-    //logisticRegression(logReg, x, label, NUM_ITERS);
-    if(label==1){ //Train the model extra for 1s to compensate the bias
-      for(int i=0; i<4; i++){
-        logisticRegression(logReg, x, label, NUM_ITERS);
-      }
-
-    }
-  }
-  else{
-    //predict an output
-    //BucketData* data1=searchHashtable(table, spec_1);
-  	//BucketData* data2=searchHashtable(table, spec_2);
-    double h = hypothesis(logReg->w,x,logReg->size);
-    int prediction;
-    if(h>=0.5){
-      prediction=1;
-
-    }
-    else{
-      prediction=0;
-
-    }
-    fprintf(fp,"%s,%s,%d\n",spec_1,spec_2,prediction);
-  }
-  free(array1);
-  free(array2);
-  free(x);
-*/
   free(spec_1);
   free(spec_2);
 
@@ -328,22 +297,25 @@ void parseCsv(char* line, Hashtable* table, Vocabulary* vocabulary, int bowSize,
 
 int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocabulary* vocabulary){
 
-    printf("Validation: size: %d\n",size);
+    //printf("Validation: size: %d\n",size);
     int totalPredictions=0;
     int totalPredictionsKept=0;
     int totalKept=0;
     ListNode* speclist=NULL;
-    Hashtable* temp_cliques = createHashtable(4000, 4);
+    Hashtable* temp_cliques = createHashtable(10000, 6);
 
     //create an x[] for each line of the array
     int bowSize = (((logReg->size)-1)/2);
-    double** x=createX(array, 0, size, table, vocabulary, bowSize);
+    SparseV** x=createX(array, 0, size, table, vocabulary, bowSize);
 
     TreeNode* bst=NULL;
 
-    for(int i=0; i<size; i++){
+    printf("X OK\n");
 
-      double h = hypothesis(logReg->w,x[i],logReg->size);//make a prediction for given row
+    for(int i=0; i<size; i++){
+      //printf("x[%d]: \n\n ",i);
+      //printSparseV(x[i]);
+      double h = hypothesis(logReg->w,x[i]);//make a prediction for given row
 
       //test if prediction was below 0.5 and adjust the score and prediction accordingly
       double score;
@@ -365,25 +337,28 @@ int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocab
       }
 
 
-      if(score<THRESHHOLD){
+      if(score<THRESHHOLD/* && prediction==0*/){
         score=(double)0;
       }
 
       //make score to be from 0 to 10
       score*= (double)20;
       //printf("hypothesis: %lf score: %lf prediction: %d\n\n",h,score,prediction);
-      bst=insertTree(bst, score, i, prediction, x[i]);
+      if(score!=0){
+        bst=insertTree(bst, score, i, prediction, x[i]);
+      }
+
       if(prediction==1) totalPredictions++;
       if(score!=0) totalKept++;
       if(score!=0 && prediction==1) totalPredictionsKept++;
     }
-    printf("total ones: %d\n",totalPredictions);
-    printf("total ones kept: %d\n",totalPredictionsKept);
-    printf("total kept: %d\n",totalKept);
+  // printf("total ones: %d\n",totalPredictions);
+  //  printf("total ones kept: %d\n",totalPredictionsKept);
+    printf("Resolving conflicts & retraining...\n");
 
     int totalConflicts= inOrderValidation(bst, array, temp_cliques, logReg, &speclist);
     for(int i=0; i<size; i++){
-      free(x[i]);
+      deleteSparseV(x[i]);
     }
 
     free(x);
@@ -392,4 +367,47 @@ int validate(char** array, int size, Classifier* logReg, Hashtable* table, Vocab
     deleteHashtable(temp_cliques);
 
     return totalConflicts;
+}
+
+void testing(char** array, int size, Classifier* logReg, Hashtable* table, Vocabulary* vocabulary){
+  int bowSize = (((logReg->size)-1)/2);
+  SparseV** x=createX(array, 0, size, table, vocabulary, bowSize);
+  int* y=createY(array,0,size);
+  int totalyes=0,totalno=0,yescorrect=0, nocorrect=0;
+  for(int i=0; i<size; i++){
+    int prediction;
+    double h = hypothesis(logReg->w,x[i]);//make a prediction for given row
+    if (h<PRED_THRESH){
+      prediction=0;
+    }
+    else{
+      prediction=1;
+    }
+
+    if(y[i]==1){
+      totalyes++;
+      if(prediction==1){
+        yescorrect++;
+      }
+    }
+    else{
+      totalno++;
+      if(prediction==0){
+        nocorrect++;
+      }
+    }
+  }
+  //printf("totalyes: %d totalno: %d correctyes: %d correctno: %d\n",totalyes, totalno, yescorrect, nocorrect);
+  int totalcorrect = yescorrect + nocorrect;
+  double totalfr = ((double)totalcorrect/(double)size)*100;
+  double yesfr = ((double)yescorrect/(double)totalyes)*100;
+  double nofr = ((double)nocorrect/(double)totalno)*100;
+
+  printf("ACCURACY: %lf %%\nYES ACCURACY: %lf %%\nNO ACCURACY: %lf %%\n",totalfr, yesfr, nofr);
+  free(y);
+  for(int i=0; i<size; i++){
+    deleteSparseV(x[i]);
+  }
+
+  free(x);
 }

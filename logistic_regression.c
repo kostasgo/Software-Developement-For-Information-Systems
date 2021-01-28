@@ -1,4 +1,5 @@
 #include "logistic_regression.h"
+#include "sparse_vectors.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -46,40 +47,44 @@ double sigmoid(double z){
 }
 
 
-double hypothesis(double* w, double* x, int size){
+double hypothesis(double* w, SparseV* x){
   /*
   f(x) = sigmoid(b + x1w1 + x2w2 + ... + xnwn)
   */
   double z = 0;
 
-  for(int i = 0; i < size; i++){
-    z += x[i] * w[i];
+  for(int i = 0; i < x->size; i++){
+  //  printf("%d: x: %lf w: %lf at index: %d\n",i,x->data[i], w[x->index[i]], x->index[i]);
+    z += x->data[i] * w[x->index[i]];
   }
+//  printf("h done!!\n");
 
   return sigmoid(z);
 
 }
 
-double costFunctionDerivative(double* theta, double** x, int size, int* y, int j, int m, double learning_rate){
+double costFunctionDerivative(double* theta, SparseV** x, int* y, int j, int m, double learning_rate){
   double sumErrors = 0;
   //printf("m is: %d\n",m);
   for(int i=0; i<m; i++){
-    double xij= x[i][j];
-  //  printf("x[i][j] is %lf\n",xij);
+    double xij= getPosValue(x[i], j);
+    //printf("x[i][j] is %lf\n",xij);
   //  double xij =xi[j];
-    double hi= hypothesis(theta,x[i], size);
+    double hi= hypothesis(theta,x[i]);
+  //  printf("%d: h OK: %lf\n",i,hi);
     double error = (hi - y[i])*xij;
     sumErrors += error;
+    //printf("sumerrors: %lf\n",sumErrors);
   }
   double constant = learning_rate/m;
 
   double ret= (double)(sumErrors * constant);
-//  printf("summerrors %lf constant %lf ret %lf\n",sumErrors, constant, ret);
+  //printf("summerrors %lf constant %lf ret %lf\n",sumErrors, constant, ret);
   return ret;
 }
 
 
-double* gradientDescent(double* theta, double** x, int size, int* y, double learning_rate, int m){
+double* gradientDescent(double* theta, SparseV** x,int size, int* y, double learning_rate, int m){
   /*
   In this function we update the weights. Since the updated weights
   are the same minus the gradient times the learning rate we just need
@@ -89,26 +94,31 @@ double* gradientDescent(double* theta, double** x, int size, int* y, double lear
 
   for(int j=0; j<size; j++){
   //  printf("%d\n",j);
-    double CFDerivative = costFunctionDerivative(theta, x, size, y, j, m, learning_rate);
+    double CFDerivative = costFunctionDerivative(theta, x, y, j, m, learning_rate);
     theta[j]=theta[j]-CFDerivative;
-    //printf("new theta[%d]: %lf\n\n",j,theta[j]);
+  //  printf("new theta[%d]: %lf\n\n",j,theta[j]);
   }
   return theta;
 
 }
 
-double* singleGradient(double* theta, double* x, int size, int y, double learning_rate){
-  double h = hypothesis(theta, x, size);
-  double error= h-y;
-  for(int j=0;j<size;j++){
-    error=error*x[j];
-    theta[j]=theta[j]-learning_rate*error;
+double* singleGradient(double* theta, SparseV* x, int y){
+  double h = hypothesis(theta, x);
+
+  double learning_rate=0.01;
+  for(int j=0;j<x->size;j++){
+    double error= h-y;
+    error=error*x->data[j];
+    //printf("%d: error: %lf\n",j,error);
+    //printf("theta at %d before: %lf",x->index[j],theta[x->index[j]]);
+    theta[x->index[j]]=theta[x->index[j]]-learning_rate*error;
+    //printf("  after: %lf\n",theta[x->index[j]]);
   }
   return theta;
 }
 
 
-double* logisticRegression(Classifier* logReg, double** x, int* y, int iterations, int m){
+double* logisticRegression(Classifier* logReg, SparseV** x, int* y, int iterations, int m){
   /*
   We simply run gradientDescent() a number of given iterations
   to upadte the weight.
@@ -120,16 +130,17 @@ double* logisticRegression(Classifier* logReg, double** x, int* y, int iteration
   //start them with what we got
   for(int i=0; i<logReg->size; i++){
     theta[i]=logReg->w[i];
-  //  printf("%d, %lf\n",i,theta[i]);
+    //printf("%d, %lf\n",i,theta[i]);
   }
+  //printf("\n\n");
    //renew for number of iterations
   for(int i = 0; i < iterations; i++){
-  //  printf("Iteration: %d\n",i);
+  //  printf("Iteration: %d\n\n",i);
     if(m!=1){
       theta=gradientDescent(theta, x, logReg->size, y, logReg->lr, m);
     }
     else{
-      theta=singleGradient(theta, *x, logReg->size, *y, logReg->lr);
+      theta=singleGradient(theta, *x, *y);
     }
 
   }

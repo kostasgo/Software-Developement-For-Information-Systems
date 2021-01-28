@@ -12,7 +12,7 @@
 
 /* Helper function that allocates a new node with the given key and
 	NULL left and right pointers. */
-TreeNode* createTreeNode(double key, int index, int prediction, double* x){
+TreeNode* createTreeNode(double key, int index, int prediction, SparseV* x){
 	TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
 	node->key = key;
   node->index = index;
@@ -27,7 +27,7 @@ TreeNode* createTreeNode(double key, int index, int prediction, double* x){
 
 
 
-TreeNode* insertTree(TreeNode* node, double key, int index, int prediction, double* x){
+TreeNode* insertTree(TreeNode* node, double key, int index, int prediction, SparseV* x){
 // Recursive function to insert a key in the subtree rooted
 // with node and returns the new root of the subtree.
 	if (node == NULL)
@@ -61,7 +61,7 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       char* line;
       line = strdup(array[root->index]);
     //  printf("%s\n", line);
-    //  printf("score: %lf prediction: %d\n", root->key, root->prediction);
+      //printf("score: %lf prediction: %d\n", root->key, root->prediction);
 
       char* id1, *id2;
     	char delim[2] =",";
@@ -105,7 +105,7 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 2: SPEC 1 IS IN, SPEC 2 NOT
 
       if((id1_isIn) && (!id2_isIn)){
-				//printf("CASE 2\n");
+			//	printf("CASE 2\n");
         Specs* spec2=createSpecs(id2);
         insertList(speclist, spec2);
         insertHashtable(&table, spec2);
@@ -120,7 +120,7 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 3: SPEC 2 IS IN, SPEC 1 NOT
 
       if((!id1_isIn) && (id2_isIn)){
-				//printf("CASE 3\n");
+			//	printf("CASE 3\n");
         Specs* spec1=createSpecs(id1);
         insertList(speclist, spec1);
         insertHashtable(&table, spec1);
@@ -135,16 +135,16 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
       //CASE 4: BOTH ARE IN THE HASHTABLE
 
       if((id1_isIn) && (id2_isIn)){
-			//	printf("CASE 4\n");
+				//printf("CASE 4\n");
         if(root->prediction ==1){
           if(areNegatives(data1->clique, data2->clique)){
             totalConflicts++;
             int retrain=0;
-            double* theta =logisticRegression(logReg, (&root->x), &retrain, 20, 1);
+            double* theta =logisticRegression(logReg, &(root->x), &retrain, 1, 1);
 						for(int i=0; i<logReg->size; i++){
 							logReg->w[i]=theta[i];
 						}
-						printf("UPDATED!\n");
+						//printf("UPDATED!\n");
           }
           else{
             mergeCliques(table, id1, id2);
@@ -154,11 +154,11 @@ int inOrderValidation(TreeNode *root, char** array, Hashtable* table, Classifier
           if(compareCliques(data1->clique, data2->clique)){
             totalConflicts++;
             int retrain=1;
-						double* theta =logisticRegression(logReg, (&root->x), &retrain, 20, 1);
+						double* theta =logisticRegression(logReg, &(root->x), &retrain, 1, 1);
 						for(int i=0; i<logReg->size; i++){
 							logReg->w[i]=theta[i];
 						}
-						printf("UPDATED!\n");
+						//printf("UPDATED!\n");
           }
           else{
             updateNegatives(table, id1, id2);

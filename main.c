@@ -37,21 +37,21 @@ Run: ./modelTraining
 #define VOCABULARY_TABLE_SIZE 10000
 #define VOCABULARY_BUCKETSIZE 6
 
-#define MARGIN 0.0029
+#define MARGIN 0.0020
 
 #define LEARNING_RATE 0.1
 
 #define TRAINING_PERCENT 60
 #define VALIDATION_PERCENT 20
 
-#define QUEUE_SIZE 1000
+#define QUEUE_SIZE 4000
 #define THREAD_NUM 64
 
 #define BATCHSIZE 256
 
 #define NUM_ITERS 5
 
-#define EPOCHS 1
+#define EPOCHS 2
 // Global thread vars
 
 int done = 0;                       // Number of finished tasks
@@ -77,10 +77,10 @@ void batch_train(void* params) {
 
   //printf("%d, %d, %d, %d\n", done, logReg->size, start, end);
   //printf("In thread %s\n", array[1]);
-
+  int batchSize=end-start;
   int bowSize = (logReg->size-1)/2;
   // Create bath of X and Y
-  double **bx = createX(array,start,end, hashtable, vocabulary,bowSize);
+  SparseV **bx = createX(array,start,end, hashtable, vocabulary,bowSize);
   //printf("createX OK\n");
   int *by = createY(array,start,end);
   //printf("createY OK\n");
@@ -98,6 +98,12 @@ void batch_train(void* params) {
   done++;
   printf("Done Tasks %d\n", done);
 	pthread_mutex_unlock(&lock);
+
+  for(int i=0; i<batchSize;i++){
+    deleteSparseV(bx[i]);
+  }
+  free(bx);
+  free(by);
 }
 
 int main(int argc, char* argv[]){
@@ -124,14 +130,14 @@ Initialize input variables and data structures
 
     inputFile=strdup(MEDIUM);
     noOfLines=MEDIUMLINES;
-    printf("Running with medium file! (Default)\n\n");
+    printf("Running with medium file! (Default)\n");
   }
   if(argc == 2){
     if(!strcmp(argv[1],"-l")){
 
       inputFile=strdup(LARGE);
       noOfLines=LARGELINES;
-      printf("Running with large file!\n\n");
+      printf("Running with large file!\n");
     }
     else{
       printf("Usage: ./modelTraining (-l)\n");
@@ -160,7 +166,7 @@ the vocabulary, as well as the shrunk array of words that we are going to use fo
 
   numOfDirectories=countDirectories(DATAPATH);
   char** directories = createDirTable(numOfDirectories, DATAPATH);
-  printf("Processing directories...\n\n");
+  printf("\n---------------------------\nPARSING PHASE\n---------------------------\nProcessing directories...\n\n");
 
   for(int i=0; i<numOfDirectories; i++){
     //For each directory create files table
@@ -236,8 +242,8 @@ trainingSet, validationSet and testingSet.
   getline(&line, &len, fp);
 
   //run the csv file and adjust the cliques
+  printf("\n---------------------------\nCLIQUES PHASE\n---------------------------\nAdjusting cliques...\n\n");
 
-  printf("Adjusting cliques...\n");
   while(getline(&line, &len, fp) != -1){
     parseCsv(line, cliques, vocabulary, bowSize, logReg);
 
@@ -309,7 +315,7 @@ trainingSet, validationSet and testingSet.
   int c=0;
   line = NULL;
   len = 0;
-  printf("FinalSize = %d, TrainingSize = %d, ValidationSize = %d, TestingSize = %d\n", finalSize, trainingSize, validationSize, testingSize);
+
   while(getline(&line, &len, fp3) != -1){
     line[strlen(line)-1]='\0';
     if(c<trainingSize){
@@ -326,10 +332,10 @@ trainingSet, validationSet and testingSet.
     }
     c++;
 }
-  printf("Finised\n");
+  printf("Final set created!\n");
+  printf("FinalSize = %d, TrainingSize = %d, ValidationSize = %d, TestingSize = %d\n\n", finalSize, trainingSize, validationSize, testingSize);
 
-  shuffleArray(validationSet,validationSize);
-  shuffleArray(testingSet,testingSize);
+
   fclose(fp3);
 
 /*
@@ -337,10 +343,18 @@ trainingSet, validationSet and testingSet.
 Train the model in a number of epochs
 using multiple threads
 */
+
+
+  printf("\n---------------------------\nTRAINING PHASE\n---------------------------\nTraining the model for %d epochs...\n\n",EPOCHS);
+
+  printf("Starting weights\n\n");
+  for (int i=0; i<logReg->size; i++) {
+    printf("%lf, ", logReg->w[i]);
+  }
+  printf("\n\n");
+
   threadpool tp;
   theta=(double*)malloc(sizeof(double)*logReg->size);
-
-  printf("\nTraining the model...\n");
   if (threadpool_create(&tp, THREAD_NUM, QUEUE_SIZE) == 0)
     printf("Threadpool created\n");
 
@@ -394,7 +408,7 @@ using multiple threads
     // Calculate average W
 
 
-    printf("Now after\n\n");
+    printf("\nNew weights\n\n");
     for (int i=0; i<logReg->size; i++) {
       theta[i] /= tasks;
       logReg->w[i]=theta[i];
@@ -410,30 +424,32 @@ using multiple threads
 
 
   if (threadpool_exit(tp) == 0) printf("\nThread pool deleted\n");
+
+
 /*
 -----VALIDATION SECTION---------------
 Use the validation set to resolve conflicts, until their Number
 is minimized
 */
-  printf("\nValidating and resolving conflicts...\n");
+  printf("\n---------------------------\nVALIDATION PHASE\n---------------------------\nValidating and resolving conflicts...\n\n");
+  shuffleArray(validationSet,validationSize);
   int totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
-  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
+  printf("Total conflicts resolved: %d\n",totalConflicts);
+  int prevConflicts=totalConflicts;
+  int reduction_count=0;
 
-  totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
-  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 
-  totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
-  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
 
-  totalConflicts=validate(validationSet, validationSize, logReg, cliques, vocabulary);
-  printf("size: %d totalConflicts: %d\n",validationSize,totalConflicts);
+
+
 /*
 -----TESTING SECTION---------------
 Use the testing set to test the predictions that the model is going to
 produce.
 */
-
-
+printf("\n---------------------------\nTESTING PHASE\n---------------------------\nTesting our model's accuracy...\n\n");
+shuffleArray(testingSet,testingSize);
+testing(testingSet, testingSize, logReg, cliques, vocabulary);
 /*
 -----FINAL SECTION---------------
 Finish Program
@@ -447,7 +463,7 @@ Free memory
     perror("Unable to open file!");
     exit(1);
   }
-  printf("\nFinished! Run ./validation.sh to see how you did!\n");
+//  printf("\nFinished! Run ./validation.sh to see how you did!\n");
   fprintf(fp4, "STATISTICS\n\n\n\nFILE USED:");
   if(!strcmp(inputFile,LARGE)){
     fprintf(fp4, "LARGE\n");
@@ -469,6 +485,18 @@ Free memory
     fprintf(fp4, "%lf\n", logReg->w[i]);
 
   }
+  for(int i=0;i<trainingSize;i++){
+    free(trainingSet[i]);
+  }
+  free(trainingSet);
+  for(int i=0;i<validationSize;i++){
+    free(validationSet[i]);
+  }
+  free(validationSet);
+  for(int i=0;i<testingSize;i++){
+    free(testingSet[i]);
+  }
+  free(testingSet);
   free(theta);
   free(inputFile);
   free(line);

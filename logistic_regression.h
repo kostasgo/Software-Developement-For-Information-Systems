@@ -1,6 +1,8 @@
 #ifndef logistic_regression_h
 #define logistic_regression_h
 
+#include "sparse_vectors.h"
+
 typedef struct ClassifierType{
   /*
   The classifier struct that handles the logistic regression.
@@ -18,7 +20,8 @@ typedef struct ClassifierType{
 Classifier* createClassifier(int, double);
 void deleteClassifier(Classifier*);
 double sigmoid(double);
-double hypothesis(double*, double*, int);
-double* gradientDescent(double*, double**, int, int*, double, int);
-double* logisticRegression(Classifier*, double**, int*, int, int);
+double hypothesis(double*, SparseV*);
+double* gradientDescent(double*, SparseV**,int, int*, double, int);
+double* singleGradient(double*, SparseV*, int);
+double* logisticRegression(Classifier*, SparseV**, int*, int, int);
 #endif
